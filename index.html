@@ -1725,9 +1725,10 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  }
  simpanKeStorageKenderaan();
 
- const today = new Date().toISOString().split('T')[0];
+ const elDari = document.getElementById('filterTarikhDari');
  const elHingga = document.getElementById('filterTarikhHingga');
- if (elHingga) elHingga.value = today;
+ if (elDari) elDari.value = '';
+ if (elHingga) elHingga.value = '';
  const elTempoh = document.getElementById('filterTempoh');
  if (elTempoh) elTempoh.value = 'SEMUA';
 
@@ -2367,10 +2368,9 @@ Sila semak semula meter kenderaan anda.
  const simptomVal = document.getElementById('mSimptom').value.trim();
 
  if (idSedangDieditServis) {
- const index = datasetServis.findIndex(d => String(d.id) === String(idSedangDieditServis));
- if (index !== -1) {
- datasetServis[index] = {
- ...datasetServis[index],
+ let index = datasetServis.findIndex(d => String(d.id) === String(idSedangDieditServis));
+ const recordDikemaskini = {
+ id: (index !== -1 ? datasetServis[index].id : idSedangDieditServis),
  tarikh: tarikhServis,
  plat: platVal,
  odometer: odoSemasa,
@@ -2392,10 +2392,17 @@ Sila semak semula meter kenderaan anda.
  jumlah: nettTotal,
  bengkel: bengkelVal,
  noBil: noBilVal,
+ status: (index !== -1 ? datasetServis[index].status : 'Selesai'),
  catatan: catatanVal
  };
- hantarKeAwan({ action: 'KEMASKINI_SERVIS', data: datasetServis[index] });
+ 
+ if (index !== -1) {
+   datasetServis[index] = recordDikemaskini;
+ } else {
+   // Jika ID tidak ditemui secara langsung, masukkan semula supaya rekod tidak hilang!
+   datasetServis.unshift(recordDikemaskini);
  }
+ hantarKeAwan({ action: 'KEMASKINI_SERVIS', data: recordDikemaskini });
  idSedangDieditServis = null;
  } else {
  const recordBaru = {
@@ -2491,10 +2498,9 @@ if (semuaPlat.length === 0) {
  const catatanVal = document.getElementById('mCatatanMinyak').value.trim() || '-';
 
  if (idSedangDieditMinyak) {
- const index = datasetMinyak.findIndex(d => String(d.id) === String(idSedangDieditMinyak));
- if (index !== -1) {
- datasetMinyak[index] = {
- ...datasetMinyak[index],
+ let index = datasetMinyak.findIndex(d => String(d.id) === String(idSedangDieditMinyak));
+ const recordMinyakKemas = {
+ id: (index !== -1 ? datasetMinyak[index].id : idSedangDieditMinyak),
  tarikh: tarikhVal,
  plat: platMinyakVal,
  stesen: stesenVal,
@@ -2506,8 +2512,12 @@ if (semuaPlat.length === 0) {
  jumlah: bayaran,
  catatan: catatanVal
  };
- hantarKeAwan({ action: 'KEMASKINI_MINYAK', data: datasetMinyak[index] });
+ if (index !== -1) {
+   datasetMinyak[index] = recordMinyakKemas;
+ } else {
+   datasetMinyak.unshift(recordMinyakKemas);
  }
+ hantarKeAwan({ action: 'KEMASKINI_MINYAK', data: recordMinyakKemas });
  idSedangDieditMinyak = null;
  } else {
  const recordMinyak = {
@@ -2848,29 +2858,33 @@ if (semuaPlat.length === 0) {
  }
 
  const tarikhDari = document.getElementById('filterTarikhDari')?.value;
+ const modeTempoh = document.getElementById('filterTempoh')?.value || 'SEMUA';
 
  // Filter Servis mengikut Plat dan Julat Tempoh (Dari - Hingga)
  let filteredServis = [...datasetServis];
  if (selectedPlat !== 'ALL') {
- filteredServis = filteredServis.filter(d => d.plat === selectedPlat);
+   filteredServis = filteredServis.filter(d => d.plat === selectedPlat);
  }
- if (tarikhDari) {
- filteredServis = filteredServis.filter(d => d.tarikh >= tarikhDari);
- }
- if (tarikhHingga) {
- filteredServis = filteredServis.filter(d => d.tarikh <= tarikhHingga);
+ // Hanya tapis tarikh jika pengguna tidak memilih 'SEMUA' atau sengaja mengisi julat tarikh
+ if (modeTempoh !== 'SEMUA') {
+   if (tarikhDari) filteredServis = filteredServis.filter(d => d.tarikh >= tarikhDari);
+   if (tarikhHingga) filteredServis = filteredServis.filter(d => d.tarikh <= tarikhHingga);
+ } else if (tarikhDari || tarikhHingga) {
+   if (tarikhDari) filteredServis = filteredServis.filter(d => d.tarikh >= tarikhDari);
+   if (tarikhHingga) filteredServis = filteredServis.filter(d => d.tarikh <= tarikhHingga);
  }
 
  // Filter Minyak mengikut Plat dan Julat Tempoh (Dari - Hingga)
  let filteredMinyak = [...datasetMinyak];
  if (selectedPlat !== 'ALL') {
- filteredMinyak = filteredMinyak.filter(d => d.plat === selectedPlat);
+   filteredMinyak = filteredMinyak.filter(d => d.plat === selectedPlat);
  }
- if (tarikhDari) {
- filteredMinyak = filteredMinyak.filter(d => d.tarikh >= tarikhDari);
- }
- if (tarikhHingga) {
- filteredMinyak = filteredMinyak.filter(d => d.tarikh <= tarikhHingga);
+ if (modeTempoh !== 'SEMUA') {
+   if (tarikhDari) filteredMinyak = filteredMinyak.filter(d => d.tarikh >= tarikhDari);
+   if (tarikhHingga) filteredMinyak = filteredMinyak.filter(d => d.tarikh <= tarikhHingga);
+ } else if (tarikhDari || tarikhHingga) {
+   if (tarikhDari) filteredMinyak = filteredMinyak.filter(d => d.tarikh >= tarikhDari);
+   if (tarikhHingga) filteredMinyak = filteredMinyak.filter(d => d.tarikh <= tarikhHingga);
  }
 
  // Susun Data
