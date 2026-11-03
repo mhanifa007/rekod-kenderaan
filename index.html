@@ -10,6 +10,14 @@
  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
  <!-- FontAwesome -->
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- PWA & Mobile Web App Meta -->
+ <meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="Rekod Kenderaan">
+ <meta name="theme-color" content="#0f172a">
+ <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3202/3202926.png">
+ <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Pengurusan Kenderaan MHAS","short_name":"Kenderaan","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3202/3202926.png","sizes":"512x512","type":"image/png"}]}'>
  <style>
   .hidden { display: none !important; pointer-events: none !important; }
   .modal-backdrop { pointer-events: auto; }
@@ -104,6 +112,9 @@
  </button>
  <button onclick="bukaModalTetapan()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition flex items-center gap-1 cursor-pointer" title="Tetapan Polisi SST & Subsidi">
  <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan
+ </button>
+ <button onclick="bukaModalPWA()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition flex items-center gap-1 mr-1 cursor-pointer" title="Panduan Pasang Pintasan di Skrin Telefon">
+ <i class="fa-solid fa-mobile-screen-button text-amber-300"></i> Telefon
  </button>
  <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition flex items-center gap-1 cursor-pointer" title="Segerak Data Terkini dari Google Sheets">
  <i class="fa-solid fa-arrows-rotate text-sky-200"></i> Segerak
@@ -270,6 +281,55 @@
 
  </div>
 
+ <!-- CARTA TAMBAHAN: TREND PERBELANJAAN BULANAN (SERVIS VS MINYAK) -->
+ <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
+   <div class="flex items-center justify-between mb-4">
+     <div>
+       <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+         <i class="fa-solid fa-chart-line text-blue-600"></i>
+         Trend Perbelanjaan Bulanan (Servis & Bahan Api)
+       </h3>
+       <p class="text-xs text-slate-500">Melihat aliran naik turun perbelanjaan kenderaan dari bulan ke bulan</p>
+     </div>
+     <span class="text-slate-400 text-sm"><i class="fa-solid fa-calendar-check"></i></span>
+   </div>
+   <div class="relative h-64 sm:h-72">
+     <canvas id="chartTrendBulanan"></canvas>
+   </div>
+ </div>
+
+ <!-- JADUAL ANALISA CPK (KOS PER KM) MENGIKUT SETIAP KENDERAAN -->
+ <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
+   <div class="flex items-center justify-between mb-3">
+     <div>
+       <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+         <i class="fa-solid fa-gauge-high text-indigo-600"></i>
+         Analisa Purata Kos Per KM (CPK) & Prestasi Per Kenderaan
+       </h3>
+       <p class="text-xs text-slate-500">Kiraan kos sebenar satu kilometer (Jumlah Kos Operasi &divide; Jarak Dipandu) bagi setiap kenderaan keluarga</p>
+     </div>
+     <span class="text-slate-400 text-sm"><i class="fa-solid fa-table-list"></i></span>
+   </div>
+   <div class="overflow-x-auto">
+     <table class="w-full text-left border-collapse text-xs">
+       <thead>
+         <tr class="bg-slate-900 text-slate-200 uppercase tracking-wider">
+           <th class="py-2.5 px-3">No. Plat</th>
+           <th class="py-2.5 px-3 text-right">Jarak Dipandu</th>
+           <th class="py-2.5 px-3 text-right">Belanja Minyak</th>
+           <th class="py-2.5 px-3 text-right">Belanja Servis</th>
+           <th class="py-2.5 px-3 text-right">Kos Keseluruhan</th>
+           <th class="py-2.5 px-3 text-right text-indigo-300 font-bold">Purata CPK</th>
+           <th class="py-2.5 px-3 text-center text-emerald-300 font-bold">Purata km/L</th>
+         </tr>
+       </thead>
+       <tbody id="tableCpkBody" class="divide-y divide-slate-100 text-slate-700">
+         <!-- Diisi secara automatik oleh JS -->
+       </tbody>
+     </table>
+   </div>
+ </div>
+
  <!-- TAB NAVIGATOR: LOG PENYELENGGARAAN & LOG BELANJA MINYAK (TAJUK ASAL) -->
  <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
  
@@ -291,23 +351,13 @@
  </button>
  </div>
 
- <!-- 3 Butang Keselamatan & Sandaran (Bahasa Inggeris Sedia Ada) -->
- <div class="flex flex-wrap items-center gap-2 no-print">
- <!-- 1. Backup Data -->
- <button onclick="eksportBackupJSON()" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm" title="Download complete database backup">
- <i class="fa-solid fa-cloud-arrow-down text-blue-600"></i> Backup Data
- </button>
- 
-<!-- 2. Restore Backup -->
- <button onclick="document.getElementById('inputRestoreJSON').click()" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm" title="Restore database from backup file">
- <i class="fa-solid fa-cloud-arrow-up text-amber-600"></i> Restore Backup
- </button>
- <input type="file" id="inputRestoreJSON" accept=".json" class="hidden" onchange="pulihkanDariFailJSON(event)">
-
- <!-- 3. Data Security -->
- <button onclick="bukaModalKeselamatan()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 shadow-sm" title="Data security & reset settings">
- <i class="fa-solid fa-shield-halved text-rose-600"></i> Data Security
- </button>
+ <!-- BUTANG KHUSUS PUSAT PRIVASI & KESELAMATAN DATA (TERTUTUP & DISKRET) -->
+ <div class="flex items-center no-print">
+   <button onclick="bukaModalKeselamatan()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 hover:border-slate-400 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-2 shadow-xs cursor-pointer" title="Buka Kotak Privasi & Pengurusan Data">
+     <i class="fa-solid fa-lock text-slate-500 text-xs"></i>
+     <span>Pusat Privasi & Keselamatan Data</span>
+   </button>
+   <input type="file" id="inputRestoreJSON" accept=".json" class="hidden" onchange="pulihkanDariFailJSON(event)">
  </div>
 
  </div>
@@ -901,71 +951,122 @@
  </div>
  </div>
 
- <!-- MODAL KESELAMATAN & PENGURUSAN DATA (ANTI-DATA LOSS) -->
+ <!-- MODAL KOTAK PRIVASI & KESELAMATAN DATA (TERPISAH & SELAMAT) -->
  <div id="modalKeselamatan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
- <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-150">
+ <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+ 
+ <!-- Header Modal -->
  <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
- <button type="button" onclick="tutupModalKeselamatan()" class="flex items-center gap-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition" title="Kembali ke Dashboard">
- <i class="fa-solid fa-arrow-left"></i>
- <span>Kembali</span>
- </button>
- <div class="flex items-center gap-2">
- <span class="bg-amber-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+ <div class="flex items-center gap-2.5">
+ <span class="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow">
  <i class="fa-solid fa-shield-halved"></i>
  </span>
- <h3 class="font-bold text-sm sm:text-base">Zon Keselamatan Data</h3>
+ <div>
+ <h3 class="font-bold text-sm sm:text-base leading-tight">Pusat Privasi & Pengurusan Data</h3>
+ <p class="text-[11px] text-slate-400">Pengurusan sandaran luar talian, pemulihan data dan kawalan padam khusus</p>
  </div>
- <button type="button" onclick="tutupModalKeselamatan()" class="text-slate-400 hover:text-white transition text-lg p-1" title="Tutup">
+ </div>
+ <button type="button" onclick="tutupModalKeselamatan()" class="text-slate-400 hover:text-white transition text-lg p-1 cursor-pointer" title="Tutup">
  <i class="fa-solid fa-xmark"></i>
  </button>
  </div>
 
- <div class="p-6 space-y-5">
- <p class="text-xs text-slate-600 leading-relaxed">
- Pilihan di bawah melibatkan pengubahsuaian pukal kedua-dua rekod penyelenggaraan dan rekod minyak.
- </p>
-
- <!-- Auto-Backup Restore -->
- <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3.5 flex items-center justify-between gap-3">
- <div>
- <h5 class="text-xs font-bold text-blue-900">Salinan Auto-Sandaran (Auto-Backup)</h5>
- <p id="infoAutoBackup" class="text-[11px] text-blue-700 mt-0.5">Tersedia sekiranya berlaku kehilangan data secara tiba-tiba.</p>
- </div>
- <button onclick="pulihkanAutoBackup()" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded-lg transition whitespace-nowrap">
- Restore
- </button>
- </div>
-
- <!-- Pilihan 1: Kosongkan Semua Data -->
- <div class="border border-slate-200 rounded-xl p-3.5 space-y-2">
- <h5 class="text-xs font-bold text-slate-900 flex items-center gap-1.5 text-rose-600">
- <i class="fa-solid fa-trash-can"></i> Kosongkan Semua Rekod (Servis & Minyak)
- </h5>
- <p class="text-[11px] text-slate-500">
- Padam semua rekod bagi memulakan catatan baharu kereta anda sendiri tanpa sebarang rekod contoh.
- </p>
- <button onclick="sahkanTindakanKritikal('KOSONGKAN')" class="w-full text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-2 rounded-lg font-semibold transition">
- Pilih Untuk Kosongkan Data
- </button>
+ <!-- Kandungan Kotak Privasi -->
+ <div class="overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+ 
+ <!-- SEKSYEN 1: SANDARAN & PEMULIHAN LUAR TALIAN (OFFLINE FILE BACKUP) -->
+ <div class="border border-slate-200 bg-slate-50/70 rounded-xl p-4 space-y-3">
+   <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+     <div class="flex items-center gap-2">
+       <span class="p-1.5 bg-blue-100 text-blue-700 rounded-lg"><i class="fa-solid fa-file-shield text-xs"></i></span>
+       <h4 class="font-bold text-slate-900 text-xs">Fail Sandaran Luar Talian (.JSON)</h4>
+     </div>
+     <span class="text-[10px] text-slate-500 font-medium">Bebas Internet</span>
+   </div>
+   <p class="text-[11px] text-slate-500 leading-relaxed">
+     Muat turun salinan penuh rekod kenderaan anda ke komputer atau pulihkan sistem daripada fail sandaran yang disimpan terdahulu.
+   </p>
+   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+     <button onclick="eksportBackupJSON()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+       <i class="fa-solid fa-cloud-arrow-down"></i>
+       <span>Backup Data (Muat Turun)</span>
+     </button>
+     <button onclick="document.getElementById('inputRestoreJSON').click()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+       <i class="fa-solid fa-cloud-arrow-up"></i>
+       <span>Restore Backup (Pilih Fail)</span>
+     </button>
+   </div>
  </div>
 
- <!-- Pilihan 2: Reset Demo Data -->
- <div class="border border-slate-200 rounded-xl p-3.5 space-y-2">
- <h5 class="text-xs font-bold text-slate-900 flex items-center gap-1.5 text-slate-700">
- <i class="fa-solid fa-rotate-left"></i> Reset Demo Data (Contoh Asal)
- </h5>
- <p class="text-[11px] text-slate-500">
- Gantikan pangkalan data semasa kepada rekod contoh latihan asal.
- </p>
- <button onclick="sahkanTindakanKritikal('RESET_DEMO')" class="w-full text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-semibold transition">
- Reset Demo Data
- </button>
+ <!-- SEKSYEN 2: AUTO-SANDARAN MEMORI PELAYAR (AUTO-BACKUP) -->
+ <div class="border border-blue-200 bg-blue-50/60 rounded-xl p-3.5 flex items-center justify-between gap-3">
+   <div>
+     <h5 class="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+       <i class="fa-solid fa-clock-rotate-left text-blue-600"></i>
+       Salinan Auto-Sandaran Pelayar
+     </h5>
+     <p id="infoAutoBackup" class="text-[11px] text-blue-800 mt-0.5">Tersedia sekiranya berlaku kehilangan data secara tidak sengaja.</p>
+   </div>
+   <button onclick="pulihkanAutoBackup()" class="text-xs bg-blue-700 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-xs whitespace-nowrap cursor-pointer">
+     Pulihkan
+   </button>
  </div>
 
- <button type="button" onclick="tutupModalKeselamatan()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition">
- Tutup
- </button>
+ <!-- SEKSYEN 3: KAWALAN PEMBERSIHAN DATA (DILINDUNGI KATA KUNCI PENGESAHAN) -->
+ <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white">
+   <div class="flex items-center gap-2 pb-2 border-b border-slate-200">
+     <span class="p-1.5 bg-rose-100 text-rose-700 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-xs"></i></span>
+     <h4 class="font-bold text-slate-900 text-xs">Zon Kawalan Padam Rekod (Pilihan Berasingan)</h4>
+   </div>
+   <p class="text-[11px] text-slate-500">
+     Setiap tindakan di bawah dilindungi oleh kata kunci pengesahan untuk mengelakkan kesilapan tertekan.
+   </p>
+
+   <div class="space-y-2 pt-1">
+     <!-- Pilihan A: Kosongkan Minyak Sahaja -->
+     <div class="p-2.5 bg-amber-50/50 border border-amber-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+       <div>
+         <span class="font-bold text-amber-900 block text-xs">Kosongkan Log Belanja Minyak Sahaja</span>
+         <span class="text-[10px] text-slate-500">Rekod penyelenggaraan servis anda kekal selamat dan tidak dipadam.</span>
+       </div>
+       <button onclick="sahkanTindakanKritikal('KOSONGKAN_MINYAK')" class="text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+         Padam Minyak Sahaja
+       </button>
+     </div>
+
+     <!-- Pilihan B: Kosongkan Servis Sahaja -->
+     <div class="p-2.5 bg-blue-50/50 border border-blue-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+       <div>
+         <span class="font-bold text-blue-900 block text-xs">Kosongkan Log Penyelenggaraan Sahaja</span>
+         <span class="text-[10px] text-slate-500">Rekod belanja minyak kekal selamat dan tidak dipadam.</span>
+       </div>
+       <button onclick="sahkanTindakanKritikal('KOSONGKAN_SERVIS')" class="text-[11px] bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+         Padam Servis Sahaja
+       </button>
+     </div>
+
+     <!-- Pilihan C: Kosongkan Semua (Reset Penuh) -->
+     <div class="p-2.5 bg-rose-50/50 border border-rose-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+       <div>
+         <span class="font-bold text-rose-900 block text-xs">Kosongkan Semua Rekod (Servis & Minyak)</span>
+         <span class="text-[10px] text-slate-500">Memadam kedua-dua rekod untuk memulakan catatan dari sifar.</span>
+       </div>
+       <button onclick="sahkanTindakanKritikal('KOSONGKAN')" class="text-[11px] bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+         Kosongkan Semua
+       </button>
+     </div>
+   </div>
  </div>
+
+ </div>
+
+ <!-- Footer Modal -->
+ <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-end">
+   <button type="button" onclick="tutupModalKeselamatan()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition cursor-pointer">
+     Tutup Pusat Privasi
+   </button>
+ </div>
+
  </div>
  </div>
 
@@ -1123,6 +1224,12 @@
  ];
 
  // Fungsi Penukar Format Tarikh kepada dd/mm/yyyy
+  // Fungsi Penformat Mata Wang RM dengan Tanda Koma Ribuan (cth: RM 1,110.00)
+ function formatRM(val) {
+   const n = Number(val) || 0;
+   return 'RM ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ }
+
  function formatTarikh(strTarikh) {
  if (!strTarikh || strTarikh === '-' || strTarikh === 'Belum direkodkan') return strTarikh || '-';
  if (typeof strTarikh === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(strTarikh)) return strTarikh;
@@ -1926,29 +2033,29 @@ binaSenaraiChecklist(kat);
  const rounding = nettTotal - grandTotal;
 
  const lblPart = document.getElementById('lblPartTotal');
- if (lblPart) lblPart.innerText = 'RM ' + kosAlat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ if (lblPart) lblPart.innerText = formatRM(kosAlat);
 
  const lblLabour = document.getElementById('lblLabourTotal');
- if (lblLabour) lblLabour.innerText = 'RM ' + kosUpah.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ if (lblLabour) lblLabour.innerText = formatRM(kosUpah);
 
  const lblSub = document.getElementById('lblSubjumlahServis');
- if (lblSub) lblSub.innerText = 'RM ' + subjumlah.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ if (lblSub) lblSub.innerText = formatRM(subjumlah);
 
  const lblSST = document.getElementById('lblNilaiSST');
- if (lblSST) lblSST.innerText = 'RM ' + nilaiSST.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ if (lblSST) lblSST.innerText = formatRM(nilaiSST);
 
  const lblGrand = document.getElementById('lblGrandTotal');
- if (lblGrand) lblGrand.innerText = 'RM ' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ if (lblGrand) lblGrand.innerText = formatRM(grandTotal);
 
  const lblRound = document.getElementById('lblRounding');
  if (lblRound) {
  const tanda = rounding > 0 ? '+' : '';
- lblRound.innerText = tanda + 'RM ' + rounding.toFixed(2);
+ lblRound.innerText = tanda + formatRM(rounding);
  }
 
  const lblBesar = document.getElementById('lblJumlahBesarServis');
  if (lblBesar) {
- lblBesar.innerText = 'RM ' + nettTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ lblBesar.innerText = formatRM(nettTotal);
  }
  }
 
@@ -2701,7 +2808,7 @@ if (semuaPlat.length === 0) {
  const pctMinyak = totalOperasi > 0 ? Math.round((totalMinyak / totalOperasi) * 100) : 0;
  const pctServis = totalOperasi > 0 ? (100 - pctMinyak) : 0;
 
- document.getElementById('kpiTotalOperasi').innerText = 'RM ' + totalOperasi.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ document.getElementById('kpiTotalOperasi').innerText = formatRM(totalOperasi);
   const tempohSel = document.getElementById('filterTempoh')?.value;
  let labelMasa = 'Keseluruhan masa';
  if (tempohSel === 'BULAN_INI') labelMasa = 'Analisa Bulan Ini';
@@ -2711,9 +2818,9 @@ if (semuaPlat.length === 0) {
  else if (tarikhDari && tarikhHingga) labelMasa = `${formatTarikh(tarikhDari)} hingga ${formatTarikh(tarikhHingga)}`;
  else if (tarikhHingga) labelMasa = `Sehingga ${formatTarikh(tarikhHingga)}`;
  document.getElementById('kpiTarikhLabel').innerText = labelMasa;
- document.getElementById('kpiTotalServis').innerText = 'RM ' + totalServis.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
- document.getElementById('kpiPecahanServis').innerText = `Alat: RM ${totalAlat.toFixed(2)} | Upah: RM ${totalUpah.toFixed(2)}`;
- document.getElementById('kpiTotalMinyak').innerText = 'RM ' + totalMinyak.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ document.getElementById('kpiTotalServis').innerText = formatRM(totalServis);
+ document.getElementById('kpiPecahanServis').innerText = `Alat: ${formatRM(totalAlat)} | Upah: ${formatRM(totalUpah)}`;
+ document.getElementById('kpiTotalMinyak').innerText = formatRM(totalMinyak);
  document.getElementById('kpiLiterMinyak').innerText = `${totalLiter.toFixed(1)} Liter (${filteredMinyak.length} isian)`;
 
  // Pengiraan Kecekapan Petrol Purata & Kos Per Kilometer (CPK)
@@ -2769,6 +2876,8 @@ if (semuaPlat.length === 0) {
  renderTableMinyak(filteredMinyak);
  renderChartOperasi(filteredServis, filteredMinyak);
  renderChartSistem(filteredServis);
+ renderChartTrend(filteredServis, filteredMinyak);
+ renderTableCpk(filteredServis, filteredMinyak);
  }
 
  function updateReminder(servisData, selectedPlat) {
@@ -2817,11 +2926,11 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  <td class="py-3 px-4 text-xs font-semibold text-blue-600">${item.kategori}</td>
  <td class="py-3 px-4 max-w-xs truncate text-slate-700" title="${item.simptom}">${item.simptom}</td>
  <td class="py-3 px-4 max-w-xs truncate font-medium text-slate-900" title="${item.alat}">${item.alat}</td>
- <td class="py-3 px-4 text-right text-emerald-600 font-semibold">RM ${item.kosAlat.toFixed(2)}</td>
- <td class="py-3 px-4 text-right text-amber-600 font-semibold">RM ${item.kosUpah.toFixed(2)}</td>
+ <td class="py-3 px-4 text-right text-emerald-600 font-semibold font-mono">${formatRM(item.kosAlat)}</td>
+ <td class="py-3 px-4 text-right text-amber-600 font-semibold font-mono">${formatRM(item.kosUpah)}</td>
  <td class="py-3 px-4 text-right">
- <div class="font-extrabold text-slate-900">RM ${item.jumlah.toFixed(2)}</div>
- ${item.sst && item.sst > 0 ? `<div class="text-[10px] text-amber-700 font-medium">(SST: RM ${item.sst.toFixed(2)})</div>` : ''}
+ <div class="font-extrabold text-slate-900 font-mono">${formatRM(item.jumlah)}</div>
+ ${item.sst && item.sst > 0 ? `<div class="text-[10px] text-amber-700 font-medium font-mono">(SST: ${formatRM(item.sst)})</div>` : ''}
  </td>
  <td class="py-3 px-4 text-xs text-slate-600 max-w-xs truncate" title="${item.bengkel} - ${item.catatan}">${item.noBil ? `<span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded text-[10px] mr-1 font-mono">Bil: ${item.noBil}</span>` : ''}${item.bengkel} (${item.catatan || '-'})</td>
  <td class="py-3 px-4 text-center whitespace-nowrap no-print">
@@ -2911,7 +3020,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  <td class="py-3 px-4 text-right font-medium text-slate-800">${item.liter ? item.liter.toFixed(2) + ' L' : '-'}</td>
  <td class="py-3 px-4 text-right text-xs text-slate-600 font-mono">${item.odometer ? item.odometer.toLocaleString() + ' km' : '-'}</td>
  <td class="py-3 px-4 text-right bg-emerald-50/40 whitespace-nowrap">${effHtml}</td>
- <td class="py-3 px-4 text-right font-extrabold text-amber-700">RM ${item.jumlah.toFixed(2)}</td>
+ <td class="py-3 px-4 text-right font-extrabold text-amber-700 font-mono">${formatRM(item.jumlah)}</td>
  <td class="py-3 px-4 text-xs text-slate-500 max-w-xs truncate">${item.catatan || '-'}</td>
  <td class="py-3 px-4 text-center whitespace-nowrap no-print">
  <div class="flex items-center justify-center gap-1.5">
@@ -3021,6 +3130,164 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  });
  }
 
+ let chartTrendInstance = null;
+
+ function renderChartTrend(servisData, minyakData) {
+   if (typeof Chart === 'undefined') return;
+   const canvas = document.getElementById('chartTrendBulanan');
+   if (!canvas) return;
+   const ctx = canvas.getContext('2d');
+
+   // Kumpul semua bulan unik (YYYY-MM) daripada kedua-dua rekod
+   const mapBulan = {};
+   [...servisData, ...minyakData].forEach(d => {
+     if (d.tarikh && d.tarikh.length >= 7) {
+       const blnKey = d.tarikh.slice(0, 7);
+       if (!mapBulan[blnKey]) {
+         mapBulan[blnKey] = { servis: 0, minyak: 0 };
+       }
+     }
+   });
+
+   servisData.forEach(d => {
+     if (d.tarikh && d.tarikh.length >= 7) {
+       const blnKey = d.tarikh.slice(0, 7);
+       if (mapBulan[blnKey]) mapBulan[blnKey].servis += (d.jumlah || 0);
+     }
+   });
+
+   minyakData.forEach(d => {
+     if (d.tarikh && d.tarikh.length >= 7) {
+       const blnKey = d.tarikh.slice(0, 7);
+       if (mapBulan[blnKey]) mapBulan[blnKey].minyak += (d.jumlah || 0);
+     }
+   });
+
+   const senaraiBulan = Object.keys(mapBulan).sort();
+   const namaBulanMelayu = ["Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ogo", "Sep", "Okt", "Nov", "Dis"];
+   const labels = senaraiBulan.map(b => {
+     const [thn, bln] = b.split('-');
+     return `${namaBulanMelayu[parseInt(bln, 10) - 1]} ${thn}`;
+   });
+
+   const dataServis = senaraiBulan.map(b => mapBulan[b].servis);
+   const dataMinyak = senaraiBulan.map(b => mapBulan[b].minyak);
+
+   if (chartTrendInstance) {
+     chartTrendInstance.destroy();
+   }
+
+   const hasData = senaraiBulan.length > 0;
+
+   chartTrendInstance = new Chart(ctx, {
+     type: 'bar',
+     data: {
+       labels: hasData ? labels : ['Tiada Data'],
+       datasets: [
+         { label: 'Kos Penyelenggaraan (RM)', data: hasData ? dataServis : [0], backgroundColor: '#3b82f6', borderRadius: 5 },
+         { label: 'Belanja Bahan Api (RM)', data: hasData ? dataMinyak : [0], backgroundColor: '#f59e0b', borderRadius: 5 }
+       ]
+     },
+     options: {
+       responsive: true,
+       maintainAspectRatio: false,
+       plugins: {
+         legend: { position: 'top' },
+         tooltip: {
+           callbacks: {
+             label: function(context) {
+               return context.dataset.label + ': ' + formatRM(context.parsed.y);
+             }
+           }
+         }
+       },
+       scales: {
+         y: {
+           beginAtZero: true,
+           ticks: {
+             callback: function(val) { return formatRM(val); }
+           }
+         }
+       }
+     }
+   });
+ }
+
+ function renderTableCpk(servisData, minyakData) {
+   const tbody = document.getElementById('tableCpkBody');
+   if (!tbody) return;
+   tbody.innerHTML = '';
+
+   const allPlats = dapatkanSemuaPlat();
+   if (allPlats.length === 0) {
+     tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400">Tiada rekod kenderaan.</td></tr>';
+     return;
+   }
+
+   allPlats.forEach(plat => {
+     const recsServis = datasetServis.filter(d => d.plat === plat);
+     const recsMinyak = datasetMinyak.filter(d => d.plat === plat);
+
+     const kosServis = recsServis.reduce((acc, c) => acc + (c.jumlah || 0), 0);
+     const kosMinyak = recsMinyak.reduce((acc, c) => acc + (c.jumlah || 0), 0);
+     const kosTotal = kosServis + kosMinyak;
+
+     // Kira jarak daripada rekod minyak
+     const sortedM = [...recsMinyak].filter(d => d.odometer && d.odometer > 0).sort((a,b) => a.odometer - b.odometer);
+     let jarakMinyak = 0;
+     let literMinyak = 0;
+     for (let i = 1; i < sortedM.length; i++) {
+       const delta = sortedM[i].odometer - sortedM[i-1].odometer;
+       if (delta > 0 && sortedM[i].liter > 0) {
+         jarakMinyak += delta;
+         literMinyak += sortedM[i].liter;
+       }
+     }
+
+     const purataKmL = (literMinyak > 0 && jarakMinyak > 0) ? (jarakMinyak / literMinyak).toFixed(2) : '-';
+     const cpkVal = (jarakMinyak > 0) ? (kosTotal / jarakMinyak).toFixed(2) : '-';
+
+     let badgeKmL = `<span class="text-slate-400">-</span>`;
+     if (purataKmL !== '-') {
+       const pVal = parseFloat(purataKmL);
+       let bg = "bg-emerald-100 text-emerald-800";
+       if (pVal < 10.0) bg = "bg-rose-100 text-rose-800";
+       else if (pVal < 12.0) bg = "bg-amber-100 text-amber-800";
+       badgeKmL = `<span class="px-2 py-0.5 rounded-full font-bold ${bg}">${purataKmL} km/L</span>`;
+     }
+
+     const tr = document.createElement('tr');
+     tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+     tr.innerHTML = `
+       <td class="py-2.5 px-3 font-bold whitespace-nowrap"><span class="bg-slate-800 text-white font-mono px-2 py-0.5 rounded text-[11px]">${plat}</span></td>
+       <td class="py-2.5 px-3 text-right font-mono font-semibold">${jarakMinyak > 0 ? jarakMinyak.toLocaleString() + ' km' : '<span class="text-slate-400 font-normal">Perlu min 2 isian</span>'}</td>
+       <td class="py-2.5 px-3 text-right text-amber-700 font-semibold">${formatRM(kosMinyak)}</td>
+       <td class="py-2.5 px-3 text-right text-blue-700 font-semibold">${formatRM(kosServis)}</td>
+       <td class="py-2.5 px-3 text-right font-bold text-slate-900">${formatRM(kosTotal)}</td>
+       <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-700">${cpkVal !== '-' ? 'RM ' + cpkVal + '/km' : '<span class="text-slate-400 font-normal">-</span>'}</td>
+       <td class="py-2.5 px-3 text-center whitespace-nowrap">${badgeKmL}</td>
+     `;
+     tbody.appendChild(tr);
+   });
+ }
+
+ function bukaModalPWA() {
+   const m = document.getElementById('modalPWA');
+   if (m) {
+     m.classList.remove('hidden');
+     m.classList.add('flex');
+   }
+ }
+
+ function tutupModalPWA() {
+   const m = document.getElementById('modalPWA');
+   if (m) {
+     m.classList.add('hidden');
+     m.classList.remove('flex');
+   }
+ }
+
+
  function eksportExcel() {
  const selectedPlat = document.getElementById('filterPlat').value;
  const tarikhHingga = document.getElementById('filterTarikhHingga').value;
@@ -3119,8 +3386,34 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  }
 
  function sahkanTindakanKritikal(tindakan) {
- if (tindakan === 'KOSONGKAN') {
- const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD TRANSAKSI?\n\nSila taipkan 'PADAM' untuk mengesahkan:");
+ if (tindakan === 'KOSONGKAN_MINYAK') {
+   const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD BELANJA MINYAK?\n\n(Rekod penyelenggaraan & servis anda KEKAL SELAMAT).\n\nSila taipkan 'MINYAK' untuk mengesahkan:");
+   if (sah === 'MINYAK') {
+     ciptaAutoBackup();
+     datasetMinyak = [];
+     simpanKeStorageMinyak();
+     datasetKenderaan = [...new Set([...datasetServis.map(d=>d.plat), ...datasetKenderaan])].filter(Boolean);
+     simpanKeStorageKenderaan();
+     tutupModalKeselamatan();
+     populatePlatFilter();
+     renderAll();
+     alert("✅ Semua rekod belanja minyak telah dipadam. Rekod penyelenggaraan anda kekal utuh!");
+   }
+ } else if (tindakan === 'KOSONGKAN_SERVIS') {
+   const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD PENYELENGGARAAN?\n\n(Rekod belanja minyak anda KEKAL SELAMAT).\n\nSila taipkan 'SERVIS' untuk mengesahkan:");
+   if (sah === 'SERVIS') {
+     ciptaAutoBackup();
+     datasetServis = [];
+     simpanKeStorageServis();
+     datasetKenderaan = [...new Set([...datasetMinyak.map(d=>d.plat), ...datasetKenderaan])].filter(Boolean);
+     simpanKeStorageKenderaan();
+     tutupModalKeselamatan();
+     populatePlatFilter();
+     renderAll();
+     alert("✅ Semua rekod penyelenggaraan telah dipadam. Rekod belanja minyak kekal utuh!");
+   }
+ } else if (tindakan === 'KOSONGKAN') {
+ const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD TRANSAKSI (Servis & Minyak)?\n\nSila taipkan 'PADAM' untuk mengesahkan:");
  if (sah === 'PADAM') {
  ciptaAutoBackup();
  datasetServis = [];
@@ -3254,6 +3547,61 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  </div>
  </form>
  </div>
+ </div>
+
+
+ <!-- MODAL PANDUAN PINTASAN SKRIN TELEFON (PWA ADD TO HOME SCREEN) -->
+ <div id="modalPWA" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-150">
+     <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+       <div class="flex items-center gap-2">
+         <span class="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow">
+           <i class="fa-solid fa-mobile-screen-button"></i>
+         </span>
+         <h3 class="font-bold text-sm sm:text-base">Pasang di Skrin Telefon</h3>
+       </div>
+       <button type="button" onclick="tutupModalPWA()" class="text-slate-400 hover:text-white transition text-lg p-1 cursor-pointer">
+         <i class="fa-solid fa-xmark"></i>
+       </button>
+     </div>
+     <div class="p-5 space-y-4 text-xs">
+       <p class="text-slate-600 leading-relaxed font-medium">
+         Anda boleh menjadikan dashboard ini seperti aplikasi telefon tanpa perlu membuka pelayar web setiap kali:
+       </p>
+       
+       <!-- Android Chrome Steps -->
+       <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+         <div class="flex items-center gap-2 font-bold text-slate-900">
+           <i class="fa-brands fa-android text-emerald-600 text-sm"></i>
+           <span>Untuk Pengguna Android (Chrome):</span>
+         </div>
+         <ol class="list-decimal list-inside space-y-1 text-slate-600 pl-1">
+           <li>Buka pautan dashboard di pelayar <strong>Google Chrome</strong>.</li>
+           <li>Tekan <strong>tiga titik bertindih (&vellip;)</strong> di penjuru atas kanan.</li>
+           <li>Pilih <strong>"Install app"</strong> atau <strong>"Add to Home screen"</strong>.</li>
+           <li>Ikon <em>Kenderaan</em> akan muncul di skrin utama telefon anda!</li>
+         </ol>
+       </div>
+
+       <!-- iPhone Safari Steps -->
+       <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+         <div class="flex items-center gap-2 font-bold text-slate-900">
+           <i class="fa-brands fa-apple text-slate-900 text-sm"></i>
+           <span>Untuk Pengguna iPhone / iPad (Safari):</span>
+         </div>
+         <ol class="list-decimal list-inside space-y-1 text-slate-600 pl-1">
+           <li>Buka pautan dashboard di pelayar <strong>Safari</strong>.</li>
+           <li>Tekan butang <strong>Kongsi (Share <i class="fa-solid fa-arrow-up-from-bracket"></i>)</strong> di bahagian bawah.</li>
+           <li>Skrol ke bawah dan pilih <strong>"Add to Home Screen"</strong>.</li>
+           <li>Tekan <strong>"Add"</strong> di penjuru atas kanan.</li>
+         </ol>
+       </div>
+
+       <button type="button" onclick="tutupModalPWA()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs transition cursor-pointer">
+         Faham, Tutup Panduan
+       </button>
+     </div>
+   </div>
  </div>
 
 </body>
