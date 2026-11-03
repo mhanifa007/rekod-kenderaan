@@ -21,8 +21,6 @@
     header, .no-print { display: none !important; }
     body { background-color: #ffffff; }
     main { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    .shadow-sm, .shadow-md, .shadow-2xl { box-shadow: none !important; }
-    .border { border-color: #e2e8f0 !important; }
   }
   th.sortable:hover { background-color: #1e293b; cursor: pointer; }
   .tab-active { border-bottom: 2px solid #2563eb; color: #1e40af; font-weight: 700; }
@@ -65,7 +63,6 @@
            <option value="BULAN_LEPAS">Bulan Lepas</option>
            <option value="30_HARI">30 Hari Terakhir</option>
            <option value="TAHUN_INI">Tahun Ini</option>
-           <option value="CUSTOM">Pilih Julat Tarikh...</option>
          </select>
        </div>
 
@@ -88,16 +85,13 @@
        </div>
 
        <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs shadow-sm">
-         <button onclick="eksportExcel()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Muat Turun Excel (.csv)">
+         <button onclick="eksportExcel()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer">
            <i class="fa-solid fa-file-excel text-emerald-400"></i> Excel
          </button>
-         <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Cetak Ringkasan Eksekutif A4">
+         <button onclick="window.print()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer">
            <i class="fa-solid fa-print text-indigo-200"></i> A4
          </button>
-         <button onclick="bukaModalTetapan()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Tetapan Polisi SST & Subsidi">
-           <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan
-         </button>
-         <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition cursor-pointer" title="Segerak Data Terkini dari Google Sheets">
+         <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition cursor-pointer">
            <i class="fa-solid fa-arrows-rotate text-sky-200"></i> Segerak
          </button>
        </div>
@@ -135,13 +129,10 @@
        <button onclick="bukaModalServisSeterusnya()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg transition font-bold shadow border border-indigo-400 cursor-pointer">
          <i class="fa-solid fa-calendar-check mr-1"></i> Servis Seterusnya
        </button>
-       <button onclick="bukaModalServis()" class="text-xs bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer">
-         Jadualkan Servis
-       </button>
      </div>
    </div>
 
-   <!-- KPI Cards -->
+   <!-- 5 Kad Ringkasan KPI -->
    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kos Keseluruhan</span>
@@ -170,13 +161,13 @@
      </div>
    </div>
 
-   <!-- Carta Penuh (3 Carta Asal) -->
+   <!-- BAHAGIAN GRAF 1 & 2 (DIPULIHKAN DARI V42) -->
    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
      <div class="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
        <div class="flex items-center justify-between mb-4">
          <div>
            <h3 class="text-base font-bold text-slate-900">Perbandingan Kos Operasi Per Kenderaan (Servis vs Minyak)</h3>
-           <p class="text-xs text-slate-500">Pecahan perbelanjaan bagi setiap kenderaan</p>
+           <p class="text-xs text-slate-500">Pecahan kos setiap kenderaan</p>
          </div>
          <span class="text-slate-400 text-sm"><i class="fa-solid fa-chart-column"></i></span>
        </div>
@@ -199,7 +190,7 @@
      </div>
    </div>
 
-   <!-- Carta Trend Bulanan -->
+   <!-- BAHAGIAN GRAF 3: TREND PERBELANJAAN BULANAN (DIPULIHKAN DARI V42) -->
    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
      <div class="flex items-center justify-between mb-4">
        <div>
@@ -207,7 +198,7 @@
            <i class="fa-solid fa-chart-line text-blue-600"></i>
            Trend Perbelanjaan Bulanan (Servis & Bahan Api)
          </h3>
-         <p class="text-xs text-slate-500">Aliran perbelanjaan kenderaan dari bulan ke bulan</p>
+         <p class="text-xs text-slate-500">Aliran naik turun perbelanjaan dari bulan ke bulan</p>
        </div>
        <span class="text-slate-400 text-sm"><i class="fa-solid fa-calendar-check"></i></span>
      </div>
@@ -216,7 +207,7 @@
      </div>
    </div>
 
-   <!-- Jadual Analisa CPK -->
+   <!-- JADUAL ANALISA CPK & PRESTASI KENDERAAN (DIPULIHKAN DARI V42) -->
    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
      <div class="flex items-center justify-between mb-3">
        <div>
@@ -245,7 +236,7 @@
      </div>
    </div>
 
-   <!-- Tabs Log -->
+   <!-- Tabs Log & Jadual Data -->
    <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
      <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-slate-50/50">
        <div class="flex items-center gap-6 text-sm font-semibold">
@@ -293,7 +284,7 @@
          </table>
        </div>
        <div id="noDataServisText" class="hidden text-center py-10 text-slate-400 text-sm">
-         Tiada rekod penyelenggaraan ditemui.
+         Tiada rekod penyelenggaraan ditemui bagi kriteria penapis ini.
        </div>
      </div>
 
@@ -325,11 +316,11 @@
    </div>
  </main>
 
- <!-- Modal Servis Seterusnya -->
+ <!-- MODAL 1: SERVIS SETERUSNYA (KRITERIA & STATUS HAYAT) -->
  <div id="modalServisSeterusnya" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-       <h3 class="font-bold text-base leading-tight">Servis Seterusnya (Status Komponen)</h3>
+       <h3 class="font-bold text-base leading-tight">Servis Seterusnya (Kriteria Komponen)</h3>
        <button type="button" onclick="tutupModalServisSeterusnya()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
          <i class="fa-solid fa-xmark"></i>
        </button>
@@ -347,7 +338,7 @@
    </div>
  </div>
 
- <!-- Modal Servis (Edit / Tambah) -->
+ <!-- MODAL 2: BORANG SERVIS (EDIT / TAMBAH) -->
  <div id="modalServis" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -446,7 +437,7 @@
    </div>
  </div>
 
- <!-- Modal Minyak -->
+ <!-- MODAL 3: BORANG MINYAK -->
  <div id="modalMinyak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -521,7 +512,7 @@
    </div>
  </div>
 
- <!-- Modal Pusat Privasi & Keselamatan Data -->
+ <!-- MODAL 4: PUSAT PRIVASI & KESELAMATAN DATA -->
  <div id="modalKeselamatan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -562,7 +553,7 @@
    </div>
  </div>
 
- <!-- Javascript Logic -->
+ <!-- Javascript Engine -->
  <script>
  const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbx6ry-Krjw4KiqjZ-L5Ikljn5uhM6PphIFwoPtPFTDX_6CaeiwedmT6KbbRFRFmuH6c2w/exec";
 
@@ -793,12 +784,28 @@
    document.getElementById('badgeCountServis').innerText = dataServis.length;
    document.getElementById('badgeCountMinyak').innerText = dataMinyak.length;
 
+   updateReminder(dataServis);
    renderTableServis(dataServis);
    renderTableMinyak(dataMinyak);
    renderChartOperasi(dataServis, dataMinyak);
    renderChartSistem(dataServis);
    renderChartTrend(dataServis, dataMinyak);
    renderTableCpk(dataServis, dataMinyak);
+ }
+
+ function updateReminder(servisData) {
+   const txt = document.getElementById('reminderText');
+   if (!txt) return;
+   if (!servisData.length) {
+     txt.innerText = "Tiada rekod servis ditemui.";
+     return;
+   }
+   const last = [...servisData].sort((a,b) => new Date(b.tarikh) - new Date(a.tarikh))[0];
+   if (last && last.odoSeterusnya && last.tarikhSeterusnya) {
+     txt.innerHTML = `Kenderaan <strong>${last.plat}</strong>: Servis seterusnya bagi kategori <strong>${last.kategori}</strong> dijadualkan pada <strong class="text-white underline">${last.odoSeterusnya.toLocaleString()} km</strong> atau sebelum <strong class="text-white underline">${formatTarikh(last.tarikhSeterusnya)}</strong>.`;
+   } else {
+     txt.innerHTML = `Servis terakhir bagi kenderaan <strong>${last.plat}</strong> bertarikh <strong>${formatTarikh(last.tarikh)}</strong> (${last.simptom}).`;
+   }
  }
 
  function renderTableServis(data) {
@@ -1133,10 +1140,6 @@
    link.remove();
  }
 
- function eksportLaporanEksekutif() {
-   window.print();
- }
-
  function renderChartOperasi(servisData, minyakData) {
    if (typeof Chart === 'undefined') return;
    const canvas = document.getElementById('chartOperasiKenderaan');
@@ -1288,10 +1291,6 @@
      `;
      container.appendChild(card);
    });
- }
-
- function bukaModalTetapan() {
-   alert("✅ Tetapan lalai sistem aktif: SST 8% atas Upah & Pembundaran 5 Sen BNM.");
  }
 
  function initData() {
