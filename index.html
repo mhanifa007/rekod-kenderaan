@@ -2083,10 +2083,7 @@ const tarikhInput = document.getElementById('mTarikhServis');
 
  const rawOdoVal = document.getElementById('mOdoSemasa').value.trim();
  if (rawOdoVal === '') {
-   alert("⚠️ Ruangan Odometer Semasa Diwajibkan!
-
-Sila masukkan bacaan odometer kenderaan anda.
-Sekiranya ini rekod lama yang tiada bacaan kilometer atau meter kenderaan rosak, sila masukkan lima angka sifar (00000).");
+   alert("⚠️ Ruangan Odometer Semasa Diwajibkan!\n\nSila masukkan bacaan odometer kenderaan anda.\nSekiranya ini rekod lama yang tiada bacaan kilometer atau meter kenderaan rosak, sila masukkan lima angka sifar (00000).");
    document.getElementById('mOdoSemasa').focus();
    return;
  }
