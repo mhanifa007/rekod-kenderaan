@@ -30,7 +30,7 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen pb-12">
 
- <!-- Navbar -->
+ <!-- Top Navbar -->
  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 no-print">
    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col lg:flex-row justify-between items-center gap-4">
      <div class="flex items-center gap-3">
@@ -48,7 +48,7 @@
        </div>
      </div>
 
-     <!-- Actions -->
+     <!-- Bar Tindakan -->
      <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs">
          <i class="fa-solid fa-car text-slate-400"></i>
@@ -94,16 +94,19 @@
          <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Cetak Ringkasan Eksekutif A4">
            <i class="fa-solid fa-print text-indigo-200"></i> A4
          </button>
+         <button onclick="bukaModalTetapan()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Tetapan Polisi SST & Subsidi">
+           <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan
+         </button>
          <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition cursor-pointer" title="Segerak Data Terkini dari Google Sheets">
            <i class="fa-solid fa-arrows-rotate text-sky-200"></i> Segerak
          </button>
        </div>
 
        <div class="flex items-center gap-2">
-         <button onclick="bukaModalMinyak()" class="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
+         <button onclick="bukaModalMinyak()" class="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer">
            <i class="fa-solid fa-gas-pump"></i> + Kos Minyak
          </button>
-         <button onclick="bukaModalServis()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
+         <button onclick="bukaModalServis()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5 cursor-pointer">
            <i class="fa-solid fa-plus-circle"></i> + Servis
          </button>
        </div>
@@ -167,7 +170,82 @@
      </div>
    </div>
 
-   <!-- Tabs -->
+   <!-- Carta Penuh (3 Carta Asal) -->
+   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+     <div class="lg:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
+       <div class="flex items-center justify-between mb-4">
+         <div>
+           <h3 class="text-base font-bold text-slate-900">Perbandingan Kos Operasi Per Kenderaan (Servis vs Minyak)</h3>
+           <p class="text-xs text-slate-500">Pecahan perbelanjaan bagi setiap kenderaan</p>
+         </div>
+         <span class="text-slate-400 text-sm"><i class="fa-solid fa-chart-column"></i></span>
+       </div>
+       <div class="relative h-64 sm:h-72">
+         <canvas id="chartOperasiKenderaan"></canvas>
+       </div>
+     </div>
+
+     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+       <div class="flex items-center justify-between mb-4">
+         <div>
+           <h3 class="text-base font-bold text-slate-900">Pecahan Kategori / Sistem</h3>
+           <p class="text-xs text-slate-500">Kategori pembaikan & servis</p>
+         </div>
+         <span class="text-slate-400 text-sm"><i class="fa-solid fa-chart-pie"></i></span>
+       </div>
+       <div class="relative h-60 flex items-center justify-center">
+         <canvas id="chartSistem"></canvas>
+       </div>
+     </div>
+   </div>
+
+   <!-- Carta Trend Bulanan -->
+   <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
+     <div class="flex items-center justify-between mb-4">
+       <div>
+         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+           <i class="fa-solid fa-chart-line text-blue-600"></i>
+           Trend Perbelanjaan Bulanan (Servis & Bahan Api)
+         </h3>
+         <p class="text-xs text-slate-500">Aliran perbelanjaan kenderaan dari bulan ke bulan</p>
+       </div>
+       <span class="text-slate-400 text-sm"><i class="fa-solid fa-calendar-check"></i></span>
+     </div>
+     <div class="relative h-64 sm:h-72">
+       <canvas id="chartTrendBulanan"></canvas>
+     </div>
+   </div>
+
+   <!-- Jadual Analisa CPK -->
+   <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
+     <div class="flex items-center justify-between mb-3">
+       <div>
+         <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+           <i class="fa-solid fa-gauge-high text-indigo-600"></i>
+           Analisa Purata Kos Per KM (CPK) & Prestasi Per Kenderaan
+         </h3>
+         <p class="text-xs text-slate-500">Kiraan kos sebenar satu kilometer bagi setiap kenderaan</p>
+       </div>
+     </div>
+     <div class="overflow-x-auto">
+       <table class="w-full text-left border-collapse text-xs">
+         <thead>
+           <tr class="bg-slate-900 text-slate-200 uppercase tracking-wider">
+             <th class="py-2.5 px-3">No. Plat</th>
+             <th class="py-2.5 px-3 text-right">Jarak Dipandu</th>
+             <th class="py-2.5 px-3 text-right">Belanja Minyak</th>
+             <th class="py-2.5 px-3 text-right">Belanja Servis</th>
+             <th class="py-2.5 px-3 text-right">Kos Keseluruhan</th>
+             <th class="py-2.5 px-3 text-right text-indigo-300 font-bold">Purata CPK</th>
+             <th class="py-2.5 px-3 text-center text-emerald-300 font-bold">Purata km/L</th>
+           </tr>
+         </thead>
+         <tbody id="tableCpkBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+       </table>
+     </div>
+   </div>
+
+   <!-- Tabs Log -->
    <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
      <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-slate-50/50">
        <div class="flex items-center gap-6 text-sm font-semibold">
@@ -215,7 +293,7 @@
          </table>
        </div>
        <div id="noDataServisText" class="hidden text-center py-10 text-slate-400 text-sm">
-         Tiada rekod penyelenggaraan ditemui bagi kriteria penapis ini.
+         Tiada rekod penyelenggaraan ditemui.
        </div>
      </div>
 
@@ -247,7 +325,29 @@
    </div>
  </main>
 
- <!-- Modal Servis -->
+ <!-- Modal Servis Seterusnya -->
+ <div id="modalServisSeterusnya" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
+     <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+       <h3 class="font-bold text-base leading-tight">Servis Seterusnya (Status Komponen)</h3>
+       <button type="button" onclick="tutupModalServisSeterusnya()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
+         <i class="fa-solid fa-xmark"></i>
+       </button>
+     </div>
+     <div class="overflow-y-auto p-6 space-y-5">
+       <div class="flex items-center gap-3 bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+         <label class="text-xs font-bold text-indigo-950">Pilih Kenderaan:</label>
+         <select id="modalServisSeterusnyaPlatSelect" onchange="renderServisSeterusnya(this.value)" class="text-xs bg-white border border-indigo-300 font-bold text-blue-900 px-3.5 py-1.5 rounded-lg focus:outline-none"></select>
+       </div>
+       <div id="containerServisSeterusnya" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+     </div>
+     <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end">
+       <button type="button" onclick="tutupModalServisSeterusnya()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition cursor-pointer">Tutup</button>
+     </div>
+   </div>
+ </div>
+
+ <!-- Modal Servis (Edit / Tambah) -->
  <div id="modalServis" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -266,9 +366,7 @@
            <label class="block text-xs font-semibold text-slate-700 mb-1">No. Plat Kenderaan</label>
            <div class="flex gap-2">
              <select id="mNoPlatServis" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none bg-white font-bold"></select>
-             <button type="button" onclick="promptDaftarPlatBaharu('servis')" class="px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 text-xs font-bold rounded-lg whitespace-nowrap transition cursor-pointer">
-               + Plat
-             </button>
+             <button type="button" onclick="promptDaftarPlatBaharu('servis')" class="px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 text-xs font-bold rounded-lg whitespace-nowrap transition cursor-pointer">+ Plat</button>
            </div>
          </div>
        </div>
@@ -307,19 +405,19 @@
            </select>
          </div>
          <div>
-           <label class="block text-xs font-semibold text-slate-700 mb-1">Bengkel</label>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Bengkel / Pembekal</label>
            <input type="text" id="mBengkel" placeholder="cth: Yee Peng Tyres / Bengkel Maju" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
          </div>
        </div>
 
        <div>
-         <label class="block text-xs font-semibold text-slate-700 mb-1">Simptom / Kerosakan / Catatan Servis</label>
-         <input type="text" id="mSimptom" placeholder="cth: Tukar Minyak Enjin / Brek Bunyi (Pilihan)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+         <label class="block text-xs font-semibold text-slate-700 mb-1">Simptom / Kerosakan (Pilihan)</label>
+         <input type="text" id="mSimptom" placeholder="cth: Tukar Minyak Enjin / Brek Berbunyi" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
        </div>
 
        <div>
          <label class="block text-xs font-semibold text-slate-700 mb-1">Perincian Alat Ganti / Item Digunakan</label>
-         <input type="text" id="mAlatGanti" placeholder="cth: Clutch kit set, Minyak Enjin 5W-30 (Pilihan)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+         <input type="text" id="mAlatGanti" placeholder="cth: Clutch kit set & Bearing, Minyak Enjin 5W-30" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
        </div>
 
        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -445,7 +543,7 @@
            Fail Sandaran Luar Talian (.JSON)
          </h4>
          <p class="text-slate-500 leading-relaxed">
-           Muat turun salinan data ke komputer anda untuk sandaran selamat atau pulihkan sistem daripada fail sandaran terdahulu.
+           Muat turun salinan penuh rekod ke komputer atau pulihkan sistem daripada fail sandaran tanpa sambungan internet.
          </p>
          <div class="grid grid-cols-2 gap-2 pt-1">
            <button onclick="eksportBackupJSON()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
@@ -458,15 +556,13 @@
        </div>
 
        <div class="flex justify-end pt-2">
-         <button type="button" onclick="tutupModalKeselamatan()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition cursor-pointer">
-           Tutup
-         </button>
+         <button type="button" onclick="tutupModalKeselamatan()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition cursor-pointer">Tutup</button>
        </div>
      </div>
    </div>
  </div>
 
- <!-- Javascript -->
+ <!-- Javascript Logic -->
  <script>
  const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbx6ry-Krjw4KiqjZ-L5Ikljn5uhM6PphIFwoPtPFTDX_6CaeiwedmT6KbbRFRFmuH6c2w/exec";
 
@@ -616,7 +712,7 @@
  function populatePlatFilter() {
    const unikPlat = [...new Set([...datasetKenderaan, ...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean).sort();
    
-   ['filterPlat', 'mNoPlatServis', 'mNoPlatMinyak'].forEach(id => {
+   ['filterPlat', 'mNoPlatServis', 'mNoPlatMinyak', 'modalServisSeterusnyaPlatSelect'].forEach(id => {
      const sel = document.getElementById(id);
      if (!sel) return;
      const cur = sel.value;
@@ -699,6 +795,10 @@
 
    renderTableServis(dataServis);
    renderTableMinyak(dataMinyak);
+   renderChartOperasi(dataServis, dataMinyak);
+   renderChartSistem(dataServis);
+   renderChartTrend(dataServis, dataMinyak);
+   renderTableCpk(dataServis, dataMinyak);
  }
 
  function renderTableServis(data) {
@@ -1035,6 +1135,163 @@
 
  function eksportLaporanEksekutif() {
    window.print();
+ }
+
+ function renderChartOperasi(servisData, minyakData) {
+   if (typeof Chart === 'undefined') return;
+   const canvas = document.getElementById('chartOperasiKenderaan');
+   if (!canvas) return;
+   const ctx = canvas.getContext('2d');
+   const allPlats = [...new Set([...servisData.map(d=>d.plat), ...minyakData.map(d=>d.plat)])].sort();
+   const kosServis = allPlats.map(p => servisData.filter(d=>d.plat===p).reduce((acc, c)=>acc+(c.jumlah||0), 0));
+   const kosMinyak = allPlats.map(p => minyakData.filter(d=>d.plat===p).reduce((acc, c)=>acc+(c.jumlah||0), 0));
+
+   if (window.chartOperasiInst) window.chartOperasiInst.destroy();
+   window.chartOperasiInst = new Chart(ctx, {
+     type: 'bar',
+     data: {
+       labels: allPlats.length ? allPlats : ['Tiada Data'],
+       datasets: [
+         { label: 'Servis (RM)', data: kosServis, backgroundColor: '#3b82f6', borderRadius: 6 },
+         { label: 'Minyak (RM)', data: kosMinyak, backgroundColor: '#f59e0b', borderRadius: 6 }
+       ]
+     },
+     options: { responsive: true, maintainAspectRatio: false }
+   });
+ }
+
+ function renderChartSistem(servisData) {
+   if (typeof Chart === 'undefined') return;
+   const canvas = document.getElementById('chartSistem');
+   if (!canvas) return;
+   const ctx = canvas.getContext('2d');
+   const sum = {};
+   servisData.forEach(d => { sum[d.kategori] = (sum[d.kategori] || 0) + (d.jumlah || 0); });
+
+   if (window.chartSistemInst) window.chartSistemInst.destroy();
+   window.chartSistemInst = new Chart(ctx, {
+     type: 'doughnut',
+     data: {
+       labels: Object.keys(sum).length ? Object.keys(sum) : ['Tiada Servis'],
+       datasets: [{ data: Object.keys(sum).length ? Object.values(sum) : [1], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'] }]
+     },
+     options: { responsive: true, maintainAspectRatio: false }
+   });
+ }
+
+ function renderChartTrend(servisData, minyakData) {
+   if (typeof Chart === 'undefined') return;
+   const canvas = document.getElementById('chartTrendBulanan');
+   if (!canvas) return;
+   const ctx = canvas.getContext('2d');
+   const mapBln = {};
+   [...servisData, ...minyakData].forEach(d => {
+     if (d.tarikh && d.tarikh.length >= 7) mapBln[d.tarikh.slice(0, 7)] = true;
+   });
+   const senaraiBulan = Object.keys(mapBln).sort();
+   const dataServis = senaraiBulan.map(b => servisData.filter(d=>d.tarikh.startsWith(b)).reduce((acc, c)=>acc+(c.jumlah||0), 0));
+   const dataMinyak = senaraiBulan.map(b => minyakData.filter(d=>d.tarikh.startsWith(b)).reduce((acc, c)=>acc+(c.jumlah||0), 0));
+
+   if (window.chartTrendInst) window.chartTrendInst.destroy();
+   window.chartTrendInst = new Chart(ctx, {
+     type: 'bar',
+     data: {
+       labels: senaraiBulan.length ? senaraiBulan : ['Tiada Data'],
+       datasets: [
+         { label: 'Servis (RM)', data: dataServis, backgroundColor: '#3b82f6', borderRadius: 4 },
+         { label: 'Minyak (RM)', data: dataMinyak, backgroundColor: '#f59e0b', borderRadius: 4 }
+       ]
+     },
+     options: { responsive: true, maintainAspectRatio: false }
+   });
+ }
+
+ function renderTableCpk(servisData, minyakData) {
+   const tbody = document.getElementById('tableCpkBody');
+   if (!tbody) return;
+   tbody.innerHTML = '';
+   const allPlats = [...new Set([...datasetKenderaan, ...datasetServis.map(d=>d.plat)])].sort();
+
+   allPlats.forEach(plat => {
+     const recsServis = servisData.filter(d => d.plat === plat);
+     const recsMinyak = minyakData.filter(d => d.plat === plat);
+     const kServis = recsServis.reduce((a, c) => a + (c.jumlah || 0), 0);
+     const kMinyak = recsMinyak.reduce((a, c) => a + (c.jumlah || 0), 0);
+     const kTotal = kServis + kMinyak;
+
+     const sortedM = [...recsMinyak].filter(d => d.odometer > 0).sort((a,b) => a.odometer - b.odometer);
+     let dKm = 0;
+     let dLit = 0;
+     for (let i = 1; i < sortedM.length; i++) {
+       const diff = sortedM[i].odometer - sortedM[i-1].odometer;
+       if (diff > 0 && sortedM[i].liter > 0) {
+         dKm += diff;
+         dLit += sortedM[i].liter;
+       }
+     }
+     const kmL = (dKm > 0 && dLit > 0) ? (dKm / dLit).toFixed(2) : '-';
+     const cpk = dKm > 0 ? (kTotal / dKm).toFixed(2) : '-';
+
+     const tr = document.createElement('tr');
+     tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+     tr.innerHTML = `
+       <td class="py-2.5 px-3 font-bold whitespace-nowrap"><span class="bg-slate-800 text-white font-mono px-2 py-0.5 rounded text-[11px]">${plat}</span></td>
+       <td class="py-2.5 px-3 text-right font-mono">${dKm > 0 ? dKm.toLocaleString() + ' km' : '<span class="text-slate-400 font-normal">Perlu min 2 isian</span>'}</td>
+       <td class="py-2.5 px-3 text-right text-amber-700 font-semibold">${formatRM(kMinyak)}</td>
+       <td class="py-2.5 px-3 text-right text-blue-700 font-semibold">${formatRM(kServis)}</td>
+       <td class="py-2.5 px-3 text-right font-bold text-slate-900">${formatRM(kTotal)}</td>
+       <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-700">${cpk !== '-' ? 'RM ' + cpk + '/km' : '-'}</td>
+       <td class="py-2.5 px-3 text-center">${kmL !== '-' ? `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">${kmL} km/L</span>` : '-'}</td>
+     `;
+     tbody.appendChild(tr);
+   });
+ }
+
+ function bukaModalServisSeterusnya() {
+   populatePlatFilter();
+   const plat = document.getElementById('filterPlat').value !== 'ALL' ? document.getElementById('filterPlat').value : (datasetKenderaan[0] || '');
+   if (plat) {
+     document.getElementById('modalServisSeterusnyaPlatSelect').value = plat;
+     renderServisSeterusnya(plat);
+   }
+   document.getElementById('modalServisSeterusnya').classList.remove('hidden');
+   document.getElementById('modalServisSeterusnya').classList.add('flex');
+ }
+
+ function tutupModalServisSeterusnya() {
+   document.getElementById('modalServisSeterusnya').classList.add('hidden');
+   document.getElementById('modalServisSeterusnya').classList.remove('flex');
+ }
+
+ function renderServisSeterusnya(plat) {
+   const container = document.getElementById('containerServisSeterusnya');
+   if (!container) return;
+   container.innerHTML = '';
+   const kategoriList = ['Service enjin', 'Clutch dan Gear', 'Sistem brek', 'Tali sawat', 'Sistem aircond', 'Sistem tayar'];
+
+   kategoriList.forEach(kat => {
+     const recs = datasetServis.filter(d => d.plat === plat && (d.kategori || '').toLowerCase().includes(kat.toLowerCase())).sort((a,b)=>new Date(b.tarikh)-new Date(a.tarikh));
+     const last = recs[0];
+     const odoLast = last && last.odometer ? `${last.odometer.toLocaleString()} km` : 'Belum direkod';
+     const tkhLast = last ? last.tarikh : '-';
+
+     const card = document.createElement('div');
+     card.className = "bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2";
+     card.innerHTML = `
+       <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+         <h4 class="font-bold text-sm text-slate-900">${kat}</h4>
+         <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full">Kriteria</span>
+       </div>
+       <div class="text-xs text-slate-600 space-y-1">
+         <div>Servis Terakhir: <strong>${odoLast}</strong> (${formatTarikh(tkhLast)})</div>
+       </div>
+     `;
+     container.appendChild(card);
+   });
+ }
+
+ function bukaModalTetapan() {
+   alert("✅ Tetapan lalai sistem aktif: SST 8% atas Upah & Pembundaran 5 Sen BNM.");
  }
 
  function initData() {
