@@ -2318,6 +2318,7 @@ Sila semak semula meter kenderaan anda.
  noBil: noBilVal,
  catatan: catatanVal
  };
+ hantarKeAwan({ action: 'KEMASKINI_SERVIS', data: datasetServis[index] });
  }
  idSedangDieditServis = null;
  } else {
@@ -2356,8 +2357,6 @@ Sila semak semula meter kenderaan anda.
  populatePlatFilter();
 
  renderAll();
-
- segerakDariAwan();
  }
 
  function bukaModalMinyak() {
@@ -2431,6 +2430,7 @@ if (semuaPlat.length === 0) {
  jumlah: bayaran,
  catatan: catatanVal
  };
+ hantarKeAwan({ action: 'KEMASKINI_MINYAK', data: datasetMinyak[index] });
  }
  idSedangDieditMinyak = null;
  } else {
