@@ -1319,77 +1319,112 @@
    return '';
  }
 
+ function bersihNombor(val) {
+   if (typeof val === 'number') return isNaN(val) ? 0 : val;
+   if (!val) return 0;
+   const str = String(val).replace(/[^0-9.-]+/g, '');
+   return parseFloat(str) || 0;
+ }
+
+ function ambilNilaiKemas(obj, senaraiKunci) {
+   if (!obj) return '';
+   for (let k of senaraiKunci) {
+     if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
+   }
+   const senaraiBersih = senaraiKunci.map(k => k.toLowerCase().replace(/[^a-z0-9]/g, ''));
+   for (let actual in obj) {
+     const actualClean = actual.toLowerCase().replace(/[^a-z0-9]/g, '');
+     for (let target of senaraiBersih) {
+       if (actualClean === target || actualClean.includes(target) || target.includes(actualClean)) {
+         if (obj[actual] !== undefined && obj[actual] !== null && obj[actual] !== '') {
+           return obj[actual];
+         }
+       }
+     }
+   }
+   return '';
+ }
+
  async function segerakDariAwan() {
- if (!CLOUD_API_URL) return;
- try {
- setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> Menyegerak...', 'bg-amber-900/60 text-amber-200 border border-amber-500/40');
- const res = await fetch(CLOUD_API_URL);
- const data = await res.json();
- if (data && data.status === 'success') {
- let adaPerubahan = false;
- if (Array.isArray(data.servis) && data.servis.length > 0) {
- datasetServis = data.servis.map(d => ({
- ...d,
- id: Number(ambilNilaiObj(d, 'id', 'ID')) || d.id,
- tarikh: String(ambilNilaiObj(d, 'tarikh', 'Tarikh') || '').split('T')[0],
- plat: String(ambilNilaiObj(d, 'plat', 'Plat', 'No Plat', 'No. Plat') || '').trim().toUpperCase(),
- odometer: Number(ambilNilaiObj(d, 'odometer', 'Odometer', 'Odometer Semasa')) || 0,
- selangKm: Number(ambilNilaiObj(d, 'selangkm', 'selangKm', 'Selang Jarak')) || 10000,
- selangBulan: Number(ambilNilaiObj(d, 'selangbulan', 'selangBulan', 'Selang Masa')) || 6,
- odoSeterusnya: Number(ambilNilaiObj(d, 'odoseterusnya', 'odoSeterusnya')) || 0,
- tarikhSeterusnya: String(ambilNilaiObj(d, 'tarikhseterusnya', 'tarikhSeterusnya') || '-').split('T')[0],
- aktiviti: String(ambilNilaiObj(d, 'aktiviti', 'Aktiviti') || 'Servis Berkala'),
- kategori: String(ambilNilaiObj(d, 'kategori', 'Kategori') || '-'),
- simptom: String(ambilNilaiObj(d, 'simptom', 'Simptom') || '-'),
- alat: String(ambilNilaiObj(d, 'alat', 'Alat', 'Alat Ganti') || '-'),
- kuantiti: String(ambilNilaiObj(d, 'kuantiti', 'Kuantiti') || '1 set'),
- kosAlat: Number(ambilNilaiObj(d, 'kosalat', 'kosAlat', 'Part Total')) || 0,
- kosUpah: Number(ambilNilaiObj(d, 'kosupah', 'kosUpah', 'Labour Total')) || 0,
- kadarSst: Number(ambilNilaiObj(d, 'kadarsst', 'kadarSst', 'SST %')) || 0,
- sst: Number(ambilNilaiObj(d, 'sst', 'SST')) || 0,
- rounding: Number(ambilNilaiObj(d, 'rounding', 'Rounding')) || 0,
- grandTotal: Number(ambilNilaiObj(d, 'grandtotal', 'grandTotal')) || 0,
- jumlah: Number(ambilNilaiObj(d, 'jumlah', 'Jumlah', 'Nett Total')) || 0,
- bengkel: String(ambilNilaiObj(d, 'bengkel', 'Bengkel') || '-'),
- noBil: String(ambilNilaiObj(d, 'nobil', 'noBil', 'No Bil', 'Bil') || ''),
- status: String(ambilNilaiObj(d, 'status', 'Status') || 'Selesai'),
- catatan: String(ambilNilaiObj(d, 'catatan', 'Catatan') || '-')
- }));
- simpanKeStorageServis();
- adaPerubahan = true;
- }
- if (Array.isArray(data.minyak) && data.minyak.length > 0) {
- datasetMinyak = data.minyak.map(d => ({
- ...d,
- id: Number(ambilNilaiObj(d, 'id', 'ID')) || d.id,
- tarikh: String(ambilNilaiObj(d, 'tarikh', 'Tarikh') || '').split('T')[0],
- plat: String(ambilNilaiObj(d, 'plat', 'Plat', 'No Plat') || '').trim().toUpperCase(),
- stesen: String(ambilNilaiObj(d, 'stesen', 'Stesen') || 'Petronas'),
- jenis: String(ambilNilaiObj(d, 'jenis', 'Jenis') || 'RON95'),
- subsidi: String(ambilNilaiObj(d, 'subsidi', 'Subsidi') || 'Bersubsidi'),
- statusIsian: String(ambilNilaiObj(d, 'statusisian', 'statusIsian') || 'Penuh'),
- liter: Number(ambilNilaiObj(d, 'liter', 'Liter')) || 0,
- odometer: Number(ambilNilaiObj(d, 'odometer', 'Odometer')) || 0,
- jumlah: Number(ambilNilaiObj(d, 'jumlah', 'Jumlah', 'Kos Minyak')) || 0,
- catatan: String(ambilNilaiObj(d, 'catatan', 'Catatan') || '-')
- }));
- simpanKeStorageMinyak();
- adaPerubahan = true;
- }
- if (adaPerubahan) {
- datasetKenderaan = [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
- simpanKeStorageKenderaan();
- populatePlatFilter();
- renderAll();
- }
- setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
- } else {
- setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
- }
- } catch(err) {
- console.warn("Gagal menyegerak dari awan:", err);
- setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Mod Luar Talian', 'bg-slate-800 text-slate-300 border border-slate-600');
- }
+   if (!CLOUD_API_URL) return;
+   try {
+     setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> Menyegerak...', 'bg-amber-900/60 text-amber-200 border border-amber-500/40');
+     const res = await fetch(CLOUD_API_URL);
+     const data = await res.json();
+     if (data && data.status === 'success') {
+       let adaPerubahan = false;
+       if (Array.isArray(data.servis) && data.servis.length > 0) {
+         datasetServis = data.servis.map((d, index) => {
+           const rawKosAlat = ambilNilaiKemas(d, ['kosAlat', 'kos_alat', 'kos alat', 'part total', 'alat']);
+           const rawKosUpah = ambilNilaiKemas(d, ['kosUpah', 'kos_upah', 'kos upah', 'labour total', 'upah']);
+           const rawJumlah = ambilNilaiKemas(d, ['jumlah', 'nett total', 'grand total', 'total']);
+           const valKosAlat = bersihNombor(rawKosAlat);
+           const valKosUpah = bersihNombor(rawKosUpah);
+           const valJumlah = bersihNombor(rawJumlah) || (valKosAlat + valKosUpah);
+
+           return {
+             ...d,
+             id: bersihNombor(ambilNilaiKemas(d, ['id', 'ID'])) || (Date.now() + index),
+             tarikh: String(ambilNilaiKemas(d, ['tarikh', 'Tarikh', 'date']) || '').split('T')[0],
+             plat: String(ambilNilaiKemas(d, ['plat', 'no plat', 'no. plat', 'kenderaan']) || '').trim().toUpperCase(),
+             odometer: bersihNombor(ambilNilaiKemas(d, ['odometer', 'odo', 'bacaan meter'])),
+             selangKm: bersihNombor(ambilNilaiKemas(d, ['selangkm', 'selang jarak'])) || 10000,
+             selangBulan: bersihNombor(ambilNilaiKemas(d, ['selangbulan', 'selang masa'])) || 6,
+             odoSeterusnya: bersihNombor(ambilNilaiKemas(d, ['odoseterusnya', 'sasaran km'])),
+             tarikhSeterusnya: String(ambilNilaiKemas(d, ['tarikhseterusnya', 'sasaran tarikh']) || '-').split('T')[0],
+             aktiviti: String(ambilNilaiKemas(d, ['aktiviti', 'jenis']) || 'Servis Berkala'),
+             kategori: String(ambilNilaiKemas(d, ['kategori', 'sistem']) || '-'),
+             simptom: String(ambilNilaiKemas(d, ['simptom', 'kerosakan']) || '-'),
+             alat: String(ambilNilaiKemas(d, ['alat', 'alat ganti', 'item']) || '-'),
+             kuantiti: String(ambilNilaiKemas(d, ['kuantiti', 'qty']) || '1 set'),
+             kosAlat: valKosAlat,
+             kosUpah: valKosUpah,
+             kadarSst: bersihNombor(ambilNilaiKemas(d, ['kadarsst', 'sst %'])),
+             sst: bersihNombor(ambilNilaiKemas(d, ['sst'])),
+             rounding: bersihNombor(ambilNilaiKemas(d, ['rounding', 'pelarasan'])),
+             grandTotal: bersihNombor(ambilNilaiKemas(d, ['grandtotal'])) || valJumlah,
+             jumlah: valJumlah,
+             bengkel: String(ambilNilaiKemas(d, ['bengkel', 'lokasi', 'kedai']) || '-'),
+             noBil: String(ambilNilaiKemas(d, ['nobil', 'no bil', 'bil', 'invois']) || ''),
+             status: String(ambilNilaiKemas(d, ['status']) || 'Selesai'),
+             catatan: String(ambilNilaiKemas(d, ['catatan', 'nota']) || '-')
+           };
+         });
+         simpanKeStorageServis();
+         adaPerubahan = true;
+       }
+       if (Array.isArray(data.minyak) && data.minyak.length > 0) {
+         datasetMinyak = data.minyak.map((d, index) => ({
+           ...d,
+           id: bersihNombor(ambilNilaiKemas(d, ['id', 'ID'])) || (Date.now() + 500 + index),
+           tarikh: String(ambilNilaiKemas(d, ['tarikh', 'Tarikh']) || '').split('T')[0],
+           plat: String(ambilNilaiKemas(d, ['plat', 'no plat', 'kenderaan']) || '').trim().toUpperCase(),
+           stesen: String(ambilNilaiKemas(d, ['stesen', 'lokasi']) || 'Petronas'),
+           jenis: String(ambilNilaiKemas(d, ['jenis', 'bahan api']) || 'RON95'),
+           subsidi: String(ambilNilaiKemas(d, ['subsidi']) || 'Bersubsidi'),
+           statusIsian: String(ambilNilaiKemas(d, ['statusisian', 'tangki']) || 'Penuh'),
+           liter: bersihNombor(ambilNilaiKemas(d, ['liter', 'kuantiti'])),
+           odometer: bersihNombor(ambilNilaiKemas(d, ['odometer', 'odo'])),
+           jumlah: bersihNombor(ambilNilaiKemas(d, ['jumlah', 'kos', 'harga', 'kos minyak'])),
+           catatan: String(ambilNilaiKemas(d, ['catatan']) || '-')
+         }));
+         simpanKeStorageMinyak();
+         adaPerubahan = true;
+       }
+       if (adaPerubahan) {
+         datasetKenderaan = [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
+         simpanKeStorageKenderaan();
+         populatePlatFilter();
+         renderAll();
+       }
+       setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
+     } else {
+       setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
+     }
+   } catch(err) {
+     console.warn("Ralat segerak dari awan:", err);
+     setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Mod Luar Talian', 'bg-slate-800 text-slate-300 border border-slate-600');
+   }
  }
 
  function hantarKeAwan(payload) {
@@ -2219,9 +2254,19 @@ const tarikhInput = document.getElementById('mTarikhServis');
    return;
  }
 
- const rawOdoVal = document.getElementById('mOdoSemasa').value.trim();
+ let rawOdoVal = document.getElementById('mOdoSemasa').value.trim();
+ 
+ // Jika sedang kemas kini dan ruangan dibiarkan kosong, kekalkan odometer sedia ada
+ if (idSedangDieditServis && rawOdoVal === '') {
+   const rekodLama = datasetServis.find(d => String(d.id) === String(idSedangDieditServis));
+   if (rekodLama && rekodLama.odometer !== undefined && rekodLama.odometer !== null) {
+     rawOdoVal = String(rekodLama.odometer);
+     document.getElementById('mOdoSemasa').value = rawOdoVal;
+   }
+ }
+
  if (rawOdoVal === '') {
-   alert("⚠️ Ruangan Odometer Semasa Diwajibkan!\n\nSila masukkan bacaan odometer kenderaan anda.\nSekiranya ini rekod lama yang tiada bacaan kilometer atau meter kenderaan rosak, sila masukkan lima angka sifar (00000).");
+   alert("⚠️ Ruangan Odometer Semasa Diwajibkan!\n\nSila masukkan bacaan odometer kenderaan anda (atau taip '00000' jika resit lama / meter rosak).");
    document.getElementById('mOdoSemasa').focus();
    return;
  }
@@ -2494,10 +2539,10 @@ if (semuaPlat.length === 0) {
  let idSedangDieditMinyak = null;
 
  function editRekodMinyak(id) {
- const item = datasetMinyak.find(d => d.id === id);
+ const item = datasetMinyak.find(d => String(d.id) === String(id));
  if (!item) return;
 
- idSedangDieditMinyak = id;
+ idSedangDieditMinyak = item.id;
  populatePlatFilter();
 
  document.getElementById('tajukModalMinyak').innerText = "Kemaskini Belanja Minyak";
@@ -2511,7 +2556,12 @@ if (semuaPlat.length === 0) {
  if (document.getElementById('mStatusIsian')) document.getElementById('mStatusIsian').value = item.statusIsian || 'Penuh';
  document.getElementById('mJumlahBayaran').value = item.jumlah ? item.jumlah.toFixed(2) : '';
  document.getElementById('mLiter').value = item.liter ? item.liter.toFixed(2) : '';
- document.getElementById('mOdometer').value = item.odometer || '';
+ 
+ if (item.odometer !== undefined && item.odometer !== null && item.odometer !== '') {
+   document.getElementById('mOdometer').value = item.odometer;
+ } else {
+   document.getElementById('mOdometer').value = '';
+ }
  document.getElementById('mCatatanMinyak').value = (item.catatan && item.catatan !== '-') ? item.catatan : '';
 
  document.getElementById('modalMinyak').classList.remove('hidden');
@@ -2520,10 +2570,10 @@ if (semuaPlat.length === 0) {
  }
 
  function editRekodServis(id) {
- const item = datasetServis.find(d => d.id === id);
+ const item = datasetServis.find(d => String(d.id) === String(id));
  if (!item) return;
 
- idSedangDieditServis = id;
+ idSedangDieditServis = item.id;
  populatePlatFilter();
 
  document.getElementById('tajukModalServis').innerText = "Kemaskini Penyelenggaraan";
@@ -2531,7 +2581,13 @@ if (semuaPlat.length === 0) {
 
  document.getElementById('mTarikhServis').value = item.tarikh || '';
  document.getElementById('mNoPlatServis').value = item.plat || '';
- document.getElementById('mOdoSemasa').value = item.odometer || '';
+
+ // Kekalkan bacaan odometer asal secara automatik
+ if (item.odometer !== undefined && item.odometer !== null && item.odometer !== '') {
+   document.getElementById('mOdoSemasa').value = item.odometer;
+ } else {
+   document.getElementById('mOdoSemasa').value = '00000';
+ }
  document.getElementById('mJenisAktiviti').value = item.aktiviti || 'Servis Berkala';
 
  // Kategori handling
