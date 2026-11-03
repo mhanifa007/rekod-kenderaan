@@ -384,7 +384,7 @@
  <th onclick="toggleSort('kos')" class="py-3 px-4 text-right sortable select-none">
  Jumlah <i id="iconSortKos" class="fa-solid fa-sort ml-1 text-slate-400"></i>
  </th>
- <th class="py-3 px-4">Bengkel / Catatan</th>
+ <th class="py-3 px-4">Bengkel</th>
  <th class="py-3 px-4 text-center no-print">Tindakan</th>
  </tr>
  </thead>
@@ -1413,7 +1413,7 @@ let currentSort = 'tarikh_desc';
  });
 
  function tutupSemuaModalSecaraSenyap() {
- ['modalServis', 'modalMinyak', 'modalKeselamatan', 'modalServisSeterusnya', 'modalPadam'].forEach(id => {
+ ['modalServis', 'modalMinyak', 'modalKeselamatan', 'modalServisSeterusnya', 'modalPadam', 'modalPerincianServis', 'modalPWA'].forEach(id => {
  const el = document.getElementById(id);
  if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
  });
@@ -2925,16 +2925,26 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  <td class="py-3 px-4 text-center whitespace-nowrap bg-blue-50/40">${sasaranHtml}</td>
  <td class="py-3 px-4 text-xs font-semibold text-blue-600">${item.kategori}</td>
  <td class="py-3 px-4 max-w-xs truncate text-slate-700" title="${item.simptom}">${item.simptom}</td>
- <td class="py-3 px-4 max-w-xs truncate font-medium text-slate-900" title="${item.alat}">${item.alat}</td>
+ <td class="py-3 px-4 max-w-xs font-medium text-slate-900 cursor-pointer group" onclick="bukaModalPerincianServis(${item.id})" title="Klik untuk lihat senarai penuh alat ganti">
+   <div class="flex items-center justify-between gap-1">
+     <span class="truncate group-hover:text-blue-600 transition underline decoration-dotted underline-offset-2">${item.alat}</span>
+     <span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1 py-0.5 rounded shrink-0 opacity-80 group-hover:opacity-100">
+       <i class="fa-solid fa-eye text-[9px]"></i> Lihat
+     </span>
+   </div>
+ </td>
  <td class="py-3 px-4 text-right text-emerald-600 font-semibold font-mono">${formatRM(item.kosAlat)}</td>
  <td class="py-3 px-4 text-right text-amber-600 font-semibold font-mono">${formatRM(item.kosUpah)}</td>
  <td class="py-3 px-4 text-right">
  <div class="font-extrabold text-slate-900 font-mono">${formatRM(item.jumlah)}</div>
  ${item.sst && item.sst > 0 ? `<div class="text-[10px] text-amber-700 font-medium font-mono">(SST: ${formatRM(item.sst)})</div>` : ''}
  </td>
- <td class="py-3 px-4 text-xs text-slate-600 max-w-xs truncate" title="${item.bengkel} - ${item.catatan}">${item.noBil ? `<span class="bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded text-[10px] mr-1 font-mono">Bil: ${item.noBil}</span>` : ''}${item.bengkel} (${item.catatan || '-'})</td>
+ <td class="py-3 px-4 text-xs font-medium text-slate-800 whitespace-nowrap" title="${item.bengkel}">${item.noBil ? `<span class="bg-slate-100 text-slate-600 font-normal px-1.5 py-0.5 rounded text-[10px] mr-1.5 font-mono">#${item.noBil}</span>` : ''}<span class="font-semibold text-slate-900">${item.bengkel || 'Bengkel Bebas'}</span></td>
  <td class="py-3 px-4 text-center whitespace-nowrap no-print">
  <div class="flex items-center justify-center gap-1.5">
+ <button onclick="bukaModalPerincianServis(${item.id})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg border border-indigo-200 transition cursor-pointer" title="Lihat Perincian Penuh Item & Invois">
+ <i class="fa-solid fa-eye"></i>
+ </button>
  <button onclick="editRekodServis(${item.id})" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-lg border border-blue-200 transition cursor-pointer" title="Edit / Kemaskini Rekod Servis">
  <i class="fa-solid fa-pen-to-square"></i>
  </button>
@@ -3466,6 +3476,76 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  }
  }
 
+ 
+ function bukaModalPerincianServis(id) {
+   const item = datasetServis.find(d => d.id === id);
+   if (!item) return;
+
+   document.getElementById('detPlat').innerText = item.plat || '-';
+   document.getElementById('detTarikh').innerText = formatTarikh(item.tarikh);
+   document.getElementById('detNoBil').innerText = item.noBil ? `Bil: ${item.noBil}` : 'Tiada No. Bil';
+   document.getElementById('detOdometer').innerText = (item.odometer !== undefined && item.odometer !== null && item.odometer !== '') 
+     ? (item.odometer === 0 ? '00000 (Meter rosak/lama)' : `${item.odometer.toLocaleString()} km`) 
+     : '-';
+   document.getElementById('detBengkel').innerText = item.bengkel || 'Bengkel Bebas';
+   document.getElementById('detSimptom').innerHTML = `<strong class="text-blue-900">[${item.kategori || 'Servis'}]</strong> ${item.simptom || 'Penyelenggaraan Am'}`;
+
+   // Senarai alat ganti yang dipecahkan
+   const containerAlat = document.getElementById('detSenaraiAlat');
+   containerAlat.innerHTML = '';
+   
+   if (item.alat && item.alat.trim() !== '') {
+     const pecahan = item.alat.split(',').map(s => s.trim()).filter(Boolean);
+     pecahan.forEach(al => {
+       const div = document.createElement('div');
+       div.className = "flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 text-xs";
+       div.innerHTML = `
+         <i class="fa-solid fa-check text-emerald-600 mt-0.5 text-[10px]"></i>
+         <span class="font-medium text-slate-800">${al}</span>
+       `;
+       containerAlat.appendChild(div);
+     });
+   } else {
+     containerAlat.innerHTML = '<span class="text-slate-400 italic">Tiada pecahan alat ganti direkodkan.</span>';
+   }
+
+   document.getElementById('detKosAlat').innerText = formatRM(item.kosAlat || 0);
+   document.getElementById('detKosUpah').innerText = formatRM(item.kosUpah || 0);
+   
+   const rowSST = document.getElementById('detRowSST');
+   if (item.sst && item.sst > 0) {
+     rowSST.classList.remove('hidden');
+     document.getElementById('detSST').innerText = formatRM(item.sst);
+   } else {
+     rowSST.classList.add('hidden');
+   }
+
+   document.getElementById('detJumlah').innerText = formatRM(item.jumlah || 0);
+   document.getElementById('detCatatan').innerText = item.catatan || '-';
+
+   const btnEdit = document.getElementById('btnEditDariPerincian');
+   btnEdit.onclick = function() {
+     tutupModalPerincianServis();
+     editRekodServis(item.id);
+   };
+
+   const m = document.getElementById('modalPerincianServis');
+   if (m) {
+     m.classList.remove('hidden');
+     m.classList.add('flex');
+     tolakSejarahModal('modalPerincianServis');
+   }
+ }
+
+ function tutupModalPerincianServis() {
+   const m = document.getElementById('modalPerincianServis');
+   if (m) {
+     m.classList.add('hidden');
+     m.classList.remove('flex');
+     undurSejarahModal();
+   }
+ }
+
  window.onload = initData;
  </script>
  <!-- POP-UP MODAL: TETAPAN POLISI & SISTEM (SST, SUBSIDI & PEMBUNDARAN) -->
@@ -3600,6 +3680,108 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
        <button type="button" onclick="tutupModalPWA()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs transition cursor-pointer">
          Faham, Tutup Panduan
        </button>
+     </div>
+   </div>
+ </div>
+
+
+ <!-- MODAL PERINCIAN RESIT / ITEM SERVIS (VIEW FULL DETAILS) -->
+ <div id="modalPerincianServis" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+     <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+       <div class="flex items-center gap-2">
+         <span class="bg-blue-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow">
+           <i class="fa-solid fa-file-invoice"></i>
+         </span>
+         <h3 class="font-bold text-sm sm:text-base">Perincian Rekod Servis & Alat Ganti</h3>
+       </div>
+       <button type="button" onclick="tutupModalPerincianServis()" class="text-slate-400 hover:text-white transition text-lg p-1 cursor-pointer">
+         <i class="fa-solid fa-xmark"></i>
+       </button>
+     </div>
+
+     <div class="overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+       <!-- Header Ringkasan Kenderaan & Invois -->
+       <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+         <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+           <div>
+             <span class="text-[10px] text-slate-400 uppercase font-bold block">No. Plat Kenderaan</span>
+             <span id="detPlat" class="bg-slate-900 text-white font-bold font-mono px-2 py-0.5 rounded text-xs"></span>
+           </div>
+           <div class="text-right">
+             <span class="text-[10px] text-slate-400 uppercase font-bold block">Tarikh Servis</span>
+             <span id="detTarikh" class="font-bold text-slate-800 text-xs font-mono"></span>
+           </div>
+         </div>
+
+         <div class="grid grid-cols-2 gap-2 text-slate-600 pt-1">
+           <div>
+             <span class="text-[10px] text-slate-400 block uppercase">No. Bil / Invois</span>
+             <strong id="detNoBil" class="font-mono text-indigo-700 text-xs"></strong>
+           </div>
+           <div>
+             <span class="text-[10px] text-slate-400 block uppercase">Odometer Semasa</span>
+             <strong id="detOdometer" class="font-mono text-slate-900 text-xs"></strong>
+           </div>
+           <div class="col-span-2">
+             <span class="text-[10px] text-slate-400 block uppercase">Bengkel / Pembekal</span>
+             <strong id="detBengkel" class="text-slate-800"></strong>
+           </div>
+         </div>
+       </div>
+
+       <!-- Bahagian Kerosakan / Simptom -->
+       <div class="bg-blue-50/50 border border-blue-200 rounded-xl p-3 space-y-1">
+         <span class="text-[10px] text-blue-900 uppercase font-bold flex items-center gap-1.5">
+           <i class="fa-solid fa-wrench text-blue-600"></i> Kategori & Simptom / Jenis Kerosakan:
+         </span>
+         <p id="detSimptom" class="text-slate-800 font-medium leading-relaxed"></p>
+       </div>
+
+       <!-- Senarai Penuh Item Dibaiki / Alat Ganti -->
+       <div class="border border-slate-200 rounded-xl p-3.5 space-y-2 bg-white">
+         <span class="text-[11px] text-slate-900 font-bold flex items-center gap-1.5 border-b border-slate-100 pb-2">
+           <i class="fa-solid fa-list-check text-emerald-600"></i>
+           Senarai Penuh Item Dibaiki & Alat Ganti:
+         </span>
+         <div id="detSenaraiAlat" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+           <!-- Diisi oleh JS -->
+         </div>
+       </div>
+
+       <!-- Ringkasan Bayaran -->
+       <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+         <div class="flex justify-between text-slate-600">
+           <span>Jumlah Alat Ganti (Part Total):</span>
+           <strong id="detKosAlat" class="font-mono text-emerald-700"></strong>
+         </div>
+         <div class="flex justify-between text-slate-600">
+           <span>Jumlah Upah (Labour Total):</span>
+           <strong id="detKosUpah" class="font-mono text-amber-700"></strong>
+         </div>
+         <div id="detRowSST" class="flex justify-between text-slate-600">
+           <span>SST (atas upah):</span>
+           <strong id="detSST" class="font-mono text-amber-800"></strong>
+         </div>
+         <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-sm">
+           <span class="font-extrabold text-slate-900">Jumlah Bayaran Bersih (Nett Total):</span>
+           <strong id="detJumlah" class="font-extrabold text-blue-800 font-mono text-base"></strong>
+         </div>
+       </div>
+
+       <!-- Catatan Tambahan -->
+       <div class="text-[11px] text-slate-500">
+         <span>Catatan: </span><span id="detCatatan" class="italic text-slate-700"></span>
+       </div>
+
+       <div class="pt-2 flex justify-between items-center">
+         <button type="button" id="btnEditDariPerincian" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+           <i class="fa-solid fa-pen-to-square"></i> Kemaskini Rekod Ini
+         </button>
+         <button type="button" onclick="tutupModalPerincianServis()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition cursor-pointer">
+           Tutup
+         </button>
+       </div>
      </div>
    </div>
  </div>
