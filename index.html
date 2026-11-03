@@ -539,12 +539,13 @@
  <div>
  <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori / Sistem</label>
  <select id="mKategori" onchange="pilihKategoriTukarSelang()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium">
- <option value="Service enjin">Service enjin (Minyak Pelincir & Penapis Minyak)</option>
+ <option value="Service enjin">Service enjin (Minyak Pelincir & Penapis Minyak Kereta)</option>
+ <option value="Servis Motosikal">Servis Motosikal (Minyak 2T/4T, Gearbox, Rantai & Plug TXR/SRX)</option>
  <option value="Palam pencucuh & Penapis udara">Palam pencucuh & Penapis udara (Plug & Air Filter)</option>
  <option value="Tali sawat">Tali sawat (Timing Belt / Fan Belt)</option>
  <option value="Sistem aircond">Sistem aircond</option>
  <option value="Sistem tayar">Sistem tayar</option>
- <option value="Sistem elektrik">Sistem elektrik</option>
+ <option value="Sistem elektrik">Sistem elektrik & Bateri</option>
  <option value="Sistem brek">Sistem brek</option>
  <option value="Lain-lain">Lain-lain (Transmisi & Cecair Lain)</option>
  </select>
@@ -662,6 +663,28 @@
  Kiraan Jadual Servis Seterusnya (Automatik)
  </span>
  <span class="text-[10px] text-indigo-600 font-medium">Boleh ubah selang mengikut kehendak anda</span>
+ </div>
+
+ <!-- PILIHAN PANTAS JENIS MINYAK & KENDERAAN -->
+ <div class="bg-white/80 p-2.5 rounded-lg border border-indigo-100 space-y-1.5">
+   <div class="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+     <i class="fa-solid fa-oil-can text-blue-600"></i>
+     <span>Pilihan Pantas Profil Minyak:</span>
+   </div>
+   <div class="flex flex-wrap gap-1.5">
+     <button type="button" onclick="setPresetProfilMinyak('KERETA_FULLY')" class="text-[10px] bg-blue-100 hover:bg-blue-200 text-blue-900 px-2 py-1 rounded-md font-bold transition border border-blue-200 flex items-center gap-1 cursor-pointer" title="Mazda CX-5 / Myvi Baru (10,000 km / 6 bulan)">
+       <i class="fa-solid fa-car text-[9px]"></i> Kereta: Fully Syn (10k km / 6 bln)
+     </button>
+     <button type="button" onclick="setPresetProfilMinyak('KERETA_SEMI')" class="text-[10px] bg-sky-100 hover:bg-sky-200 text-sky-900 px-2 py-1 rounded-md font-bold transition border border-sky-200 flex items-center gap-1 cursor-pointer" title="Myvi Lama / Persona (5,000 km / 3 bulan)">
+       <i class="fa-solid fa-car text-[9px]"></i> Kereta: Semi Syn (5k km / 3 bln)
+     </button>
+     <button type="button" onclick="setPresetProfilMinyak('MOTOR_4T')" class="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 rounded-md font-bold transition border border-amber-200 flex items-center gap-1 cursor-pointer" title="Suzuki SRX / Motor 4T (3,000 km / 3 bulan)">
+       <i class="fa-solid fa-motorcycle text-[9px]"></i> Motor 4T: SRX (3k km / 3 bln)
+     </button>
+     <button type="button" onclick="setPresetProfilMinyak('MOTOR_2T_GEAR')" class="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-900 px-2 py-1 rounded-md font-bold transition border border-emerald-200 flex items-center gap-1 cursor-pointer" title="TXR 150 Minyak Gear (3,000 km / 4 bulan)">
+       <i class="fa-solid fa-motorcycle text-[9px]"></i> Motor 2T: TXR Gear (3k km / 4 bln)
+     </button>
+   </div>
  </div>
 
  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -942,14 +965,31 @@
  // Konfigurasi Kategori Servis Utama, Item Diperkecil, Cadangan Peralatan & Selang Kitaran
  const KATEGORI_CONFIG_ASAL = {
  "Service enjin": {
- nama: "Service enjin (Minyak Pelincir & Penapis Minyak)",
- tajukRingkas: "Servis Minyak Enjin",
+ nama: "Service enjin (Minyak Pelincir & Penapis Minyak Kereta)",
+ tajukRingkas: "Servis Minyak Enjin Kereta",
  icon: "fa-oil-can",
  warna: "emerald",
  itemKecil: [
- { nama: "Minyak Enjin (Fully/Semi Synthetic)", peranti: "Minyak pelincir 5W-30 / 10W-40 (4L)", selangKm: 10000, selangBulan: 6 },
- { nama: "Penapis Minyak (Oil Filter)", peranti: "Oil filter OEM ikut spesifikasi enjin", selangKm: 10000, selangBulan: 6 },
+ { nama: "Minyak Enjin Fully Synthetic (cth: Mazda CX-5 0W-20 / Myvi Baru)", peranti: "Minyak pelincir 0W-20 / 5W-30 (4L + 1L tambahan jika Mazda)", selangKm: 10000, selangBulan: 6 },
+ { nama: "Minyak Enjin Semi Synthetic (cth: Myvi Lama / Persona 10W-40)", peranti: "Minyak pelincir 10W-40 / 5W-30 Semi (3L-4L)", selangKm: 5000, selangBulan: 3 },
+ { nama: "Penapis Minyak Kereta (Oil Filter OEM)", peranti: "Oil filter OEM ikut spesifikasi jenama enjin", selangKm: 10000, selangBulan: 6 },
  { nama: "Gasket Drain Plug (Washer)", peranti: "Crush washer tembaga/aluminium 14mm", selangKm: 10000, selangBulan: 6 }
+ ]
+ },
+ "Servis Motosikal": {
+ nama: "Servis Motosikal (Minyak 2T/4T, Kotak Gear, Palam & Rantai)",
+ tajukRingkas: "Servis Motosikal (TXR / SRX)",
+ icon: "fa-motorcycle",
+ warna: "amber",
+ itemKecil: [
+ { nama: "Minyak 4T Motosikal (cth: Suzuki SRX)", peranti: "Minyak 4T 10W-40 / 15W-50 JASO MA2 (2.0L-2.4L)", selangKm: 3000, selangBulan: 3 },
+ { nama: "Minyak Gearbox 2T (cth: TXR 150 Panther)", peranti: "Minyak transmisi klac basah SAE 10W-30 / 80W (750ml)", selangKm: 3000, selangBulan: 4 },
+ { nama: "Minyak 2T 2-Stroke Injection (TXR 150)", peranti: "Minyak 2T Low Smoke JASO FC / FD (Botol 1L)", selangKm: 1000, selangBulan: 1 },
+ { nama: "Penapis Minyak Motosikal (Oil Filter SRX)", peranti: "Oil filter elemen dalaman Suzuki SRX", selangKm: 6000, selangBulan: 6 },
+ { nama: "Palam Pencucuh Motosikal (Spark Plug 2T/4T)", peranti: "NGK BP8ES (TXR 150) / DPR8EA-9 (SRX) / Iridium", selangKm: 6000, selangBulan: 6 },
+ { nama: "Servis & Pelincir Rantai Roda (Chain Lube)", peranti: "Pembersih rantai + Semburan gris pelincir O-Ring", selangKm: 1000, selangBulan: 1 },
+ { nama: "Pelarasan Ketegangan Rantai Motosikal", peranti: "Tolok kelonggaran rantai (20-30mm slack) & jajaran roda", selangKm: 1500, selangBulan: 2 },
+ { nama: "Set Rantai & Sprocket Motosikal", peranti: "Rantai Heavy Duty 520 / 428 + Sprocket depan & belakang", selangKm: 15000, selangBulan: 18 }
  ]
  },
  "Palam pencucuh & Penapis udara": {
@@ -1317,7 +1357,10 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
      return teksAlat.includes('belt') || teksAlat.includes('tali sawat');
    }
    if (key === 'Service enjin') {
-     return teksAlat.includes('minyak enjin') || teksAlat.includes('oil filter') || teksAlat.includes('engine oil') || teksAlat.includes('pelincir') || teksAlat.includes('syntium');
+     return !teksAlat.includes('motosikal') && !teksAlat.includes('motor') && !teksAlat.includes('srx') && !teksAlat.includes('txr') && (teksAlat.includes('minyak enjin') || teksAlat.includes('oil filter') || teksAlat.includes('engine oil') || teksAlat.includes('pelincir') || teksAlat.includes('syntium'));
+   }
+   if (key === 'Servis Motosikal') {
+     return teksAlat.includes('motosikal') || teksAlat.includes('motor') || teksAlat.includes('2t') || teksAlat.includes('4t') || teksAlat.includes('rantai') || teksAlat.includes('sprocket') || teksAlat.includes('srx') || teksAlat.includes('txr') || teksAlat.includes('panther');
    }
    if (key === 'Palam pencucuh & Penapis udara') {
      return teksAlat.includes('plug') || teksAlat.includes('pencucuh') || teksAlat.includes('air filter') || teksAlat.includes('penapis udara');
@@ -1927,6 +1970,36 @@ binaSenaraiChecklist(kat);
  if (km !== null) document.getElementById('mSelangKm').value = km;
  if (bulan !== null) document.getElementById('mSelangBulan').value = bulan;
  kiraServisSeterusnya();
+ }
+
+ function setPresetProfilMinyak(profil) {
+   const mKat = document.getElementById('mKategori');
+   if (profil === 'KERETA_FULLY') {
+     mKat.value = 'Service enjin';
+     pilihKategoriTukarSelang();
+     document.getElementById('mSelangKm').value = 10000;
+     document.getElementById('mSelangBulan').value = 6;
+     document.getElementById('mSimptom').value = 'Servis Berkala Minyak Fully Synthetic (10k km)';
+   } else if (profil === 'KERETA_SEMI') {
+     mKat.value = 'Service enjin';
+     pilihKategoriTukarSelang();
+     document.getElementById('mSelangKm').value = 5000;
+     document.getElementById('mSelangBulan').value = 3;
+     document.getElementById('mSimptom').value = 'Servis Berkala Minyak Semi Synthetic (5k km)';
+   } else if (profil === 'MOTOR_4T') {
+     mKat.value = 'Servis Motosikal';
+     pilihKategoriTukarSelang();
+     document.getElementById('mSelangKm').value = 3000;
+     document.getElementById('mSelangBulan').value = 3;
+     document.getElementById('mSimptom').value = 'Servis Minyak 4T Motosikal (Suzuki SRX)';
+   } else if (profil === 'MOTOR_2T_GEAR') {
+     mKat.value = 'Servis Motosikal';
+     pilihKategoriTukarSelang();
+     document.getElementById('mSelangKm').value = 3000;
+     document.getElementById('mSelangBulan').value = 4;
+     document.getElementById('mSimptom').value = 'Servis Minyak Kotak Gear 2T (TXR 150)';
+   }
+   kiraServisSeterusnya();
  }
 
  function bukaModalServis(prefillPlat, prefillKategori) {
