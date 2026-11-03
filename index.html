@@ -1305,6 +1305,20 @@
  }
  }
 
+ function ambilNilaiObj(obj, ...keys) {
+   if (!obj) return '';
+   for (let k of keys) {
+     if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
+     let lower = k.toLowerCase();
+     for (let actual in obj) {
+       if (actual.toLowerCase() === lower && obj[actual] !== undefined && obj[actual] !== null && obj[actual] !== '') {
+         return obj[actual];
+       }
+     }
+   }
+   return '';
+ }
+
  async function segerakDariAwan() {
  if (!CLOUD_API_URL) return;
  try {
@@ -1316,19 +1330,30 @@
  if (Array.isArray(data.servis) && data.servis.length > 0) {
  datasetServis = data.servis.map(d => ({
  ...d,
- id: Number(d.id),
- tarikh: String(d.tarikh || '').split('T')[0],
- odometer: Number(d.odometer) || 0,
- selangKm: Number(d.selangKm) || 10000,
- selangBulan: Number(d.selangBulan) || 6,
- odoSeterusnya: Number(d.odoSeterusnya) || 0,
- kosAlat: Number(d.kosAlat) || 0,
- kosUpah: Number(d.kosUpah) || 0,
- kadarSst: Number(d.kadarSst) || 0,
- sst: Number(d.sst) || 0,
- rounding: Number(d.rounding) || 0,
- grandTotal: Number(d.grandTotal) || 0,
- jumlah: Number(d.jumlah) || 0
+ id: Number(ambilNilaiObj(d, 'id', 'ID')) || d.id,
+ tarikh: String(ambilNilaiObj(d, 'tarikh', 'Tarikh') || '').split('T')[0],
+ plat: String(ambilNilaiObj(d, 'plat', 'Plat', 'No Plat', 'No. Plat') || '').trim().toUpperCase(),
+ odometer: Number(ambilNilaiObj(d, 'odometer', 'Odometer', 'Odometer Semasa')) || 0,
+ selangKm: Number(ambilNilaiObj(d, 'selangkm', 'selangKm', 'Selang Jarak')) || 10000,
+ selangBulan: Number(ambilNilaiObj(d, 'selangbulan', 'selangBulan', 'Selang Masa')) || 6,
+ odoSeterusnya: Number(ambilNilaiObj(d, 'odoseterusnya', 'odoSeterusnya')) || 0,
+ tarikhSeterusnya: String(ambilNilaiObj(d, 'tarikhseterusnya', 'tarikhSeterusnya') || '-').split('T')[0],
+ aktiviti: String(ambilNilaiObj(d, 'aktiviti', 'Aktiviti') || 'Servis Berkala'),
+ kategori: String(ambilNilaiObj(d, 'kategori', 'Kategori') || '-'),
+ simptom: String(ambilNilaiObj(d, 'simptom', 'Simptom') || '-'),
+ alat: String(ambilNilaiObj(d, 'alat', 'Alat', 'Alat Ganti') || '-'),
+ kuantiti: String(ambilNilaiObj(d, 'kuantiti', 'Kuantiti') || '1 set'),
+ kosAlat: Number(ambilNilaiObj(d, 'kosalat', 'kosAlat', 'Part Total')) || 0,
+ kosUpah: Number(ambilNilaiObj(d, 'kosupah', 'kosUpah', 'Labour Total')) || 0,
+ kadarSst: Number(ambilNilaiObj(d, 'kadarsst', 'kadarSst', 'SST %')) || 0,
+ sst: Number(ambilNilaiObj(d, 'sst', 'SST')) || 0,
+ rounding: Number(ambilNilaiObj(d, 'rounding', 'Rounding')) || 0,
+ grandTotal: Number(ambilNilaiObj(d, 'grandtotal', 'grandTotal')) || 0,
+ jumlah: Number(ambilNilaiObj(d, 'jumlah', 'Jumlah', 'Nett Total')) || 0,
+ bengkel: String(ambilNilaiObj(d, 'bengkel', 'Bengkel') || '-'),
+ noBil: String(ambilNilaiObj(d, 'nobil', 'noBil', 'No Bil', 'Bil') || ''),
+ status: String(ambilNilaiObj(d, 'status', 'Status') || 'Selesai'),
+ catatan: String(ambilNilaiObj(d, 'catatan', 'Catatan') || '-')
  }));
  simpanKeStorageServis();
  adaPerubahan = true;
@@ -1336,11 +1361,17 @@
  if (Array.isArray(data.minyak) && data.minyak.length > 0) {
  datasetMinyak = data.minyak.map(d => ({
  ...d,
- id: Number(d.id),
- tarikh: String(d.tarikh || '').split('T')[0],
- liter: Number(d.liter) || 0,
- odometer: Number(d.odometer) || 0,
- jumlah: Number(d.jumlah) || 0
+ id: Number(ambilNilaiObj(d, 'id', 'ID')) || d.id,
+ tarikh: String(ambilNilaiObj(d, 'tarikh', 'Tarikh') || '').split('T')[0],
+ plat: String(ambilNilaiObj(d, 'plat', 'Plat', 'No Plat') || '').trim().toUpperCase(),
+ stesen: String(ambilNilaiObj(d, 'stesen', 'Stesen') || 'Petronas'),
+ jenis: String(ambilNilaiObj(d, 'jenis', 'Jenis') || 'RON95'),
+ subsidi: String(ambilNilaiObj(d, 'subsidi', 'Subsidi') || 'Bersubsidi'),
+ statusIsian: String(ambilNilaiObj(d, 'statusisian', 'statusIsian') || 'Penuh'),
+ liter: Number(ambilNilaiObj(d, 'liter', 'Liter')) || 0,
+ odometer: Number(ambilNilaiObj(d, 'odometer', 'Odometer')) || 0,
+ jumlah: Number(ambilNilaiObj(d, 'jumlah', 'Jumlah', 'Kos Minyak')) || 0,
+ catatan: String(ambilNilaiObj(d, 'catatan', 'Catatan') || '-')
  }));
  simpanKeStorageMinyak();
  adaPerubahan = true;
@@ -2291,7 +2322,7 @@ Sila semak semula meter kenderaan anda.
  const simptomVal = document.getElementById('mSimptom').value.trim();
 
  if (idSedangDieditServis) {
- const index = datasetServis.findIndex(d => d.id === idSedangDieditServis);
+ const index = datasetServis.findIndex(d => String(d.id) === String(idSedangDieditServis));
  if (index !== -1) {
  datasetServis[index] = {
  ...datasetServis[index],
@@ -2415,7 +2446,7 @@ if (semuaPlat.length === 0) {
  const catatanVal = document.getElementById('mCatatanMinyak').value.trim() || '-';
 
  if (idSedangDieditMinyak) {
- const index = datasetMinyak.findIndex(d => d.id === idSedangDieditMinyak);
+ const index = datasetMinyak.findIndex(d => String(d.id) === String(idSedangDieditMinyak));
  if (index !== -1) {
  datasetMinyak[index] = {
  ...datasetMinyak[index],
