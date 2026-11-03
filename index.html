@@ -48,6 +48,7 @@
        </div>
      </div>
 
+     <!-- Bar Tindakan -->
      <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs">
          <i class="fa-solid fa-car text-slate-400"></i>
@@ -92,6 +93,9 @@
          <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Cetak Ringkasan Eksekutif A4">
            <i class="fa-solid fa-print text-indigo-200"></i> A4
          </button>
+         <button onclick="bukaModalTetapan()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Tetapan Polisi SST & Subsidi">
+           <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan
+         </button>
          <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition cursor-pointer" title="Segerak Data Terkini dari Google Sheets">
            <i class="fa-solid fa-arrows-rotate text-sky-200"></i> Segerak
          </button>
@@ -109,7 +113,7 @@
    </div>
  </header>
 
- <!-- Main Container -->
+ <!-- Main Content -->
  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
 
    <!-- Peringatan Servis -->
@@ -133,7 +137,7 @@
      </div>
    </div>
 
-   <!-- KPI Cards -->
+   <!-- KPI Summary Cards -->
    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
      <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kos Keseluruhan</span>
@@ -168,7 +172,7 @@
        <div class="flex items-center justify-between mb-4">
          <div>
            <h3 class="text-base font-bold text-slate-900">Perbandingan Kos Operasi Per Kenderaan (Servis vs Minyak)</h3>
-           <p class="text-xs text-slate-500">Pecahan perbelanjaan bagi setiap kenderaan</p>
+           <p class="text-xs text-slate-500">Melihat pecahan perbelanjaan setiap kenderaan</p>
          </div>
          <span class="text-slate-400 text-sm"><i class="fa-solid fa-chart-column"></i></span>
        </div>
@@ -181,7 +185,7 @@
        <div class="flex items-center justify-between mb-4">
          <div>
            <h3 class="text-base font-bold text-slate-900">Pecahan Kategori / Sistem</h3>
-           <p class="text-xs text-slate-500">Kategori pembaikan & servis</p>
+           <p class="text-xs text-slate-500">Kategori pembaikan & penyelenggaraan</p>
          </div>
          <span class="text-slate-400 text-sm"><i class="fa-solid fa-chart-pie"></i></span>
        </div>
@@ -207,7 +211,7 @@
      </div>
    </div>
 
-   <!-- Jadual Analisa CPK & Prestasi -->
+   <!-- Jadual Analisa CPK (Kos Per KM) Asal (v42) -->
    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200/80">
      <div class="flex items-center justify-between mb-3">
        <div>
@@ -215,7 +219,7 @@
            <i class="fa-solid fa-gauge-high text-indigo-600"></i>
            Analisa Purata Kos Per KM (CPK) & Prestasi Per Kenderaan
          </h3>
-         <p class="text-xs text-slate-500">Kiraan kos sebenar satu kilometer bagi setiap kenderaan</p>
+         <p class="text-xs text-slate-500">Kiraan kos satu kilometer (Jumlah Kos Operasi &divide; Jarak Dipandu)</p>
        </div>
      </div>
      <div class="overflow-x-auto">
@@ -236,7 +240,7 @@
      </div>
    </div>
 
-   <!-- Tabs Log Penyelenggaraan & Minyak -->
+   <!-- Tab Log Penyelenggaraan & Minyak -->
    <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
      <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-slate-50/50">
        <div class="flex items-center gap-6 text-sm font-semibold">
@@ -260,7 +264,7 @@
        </div>
      </div>
 
-     <!-- Tab Servis -->
+     <!-- Tab 1: Servis -->
      <div id="tabContentServis" class="block">
        <div class="overflow-x-auto">
          <table class="w-full text-left border-collapse text-sm">
@@ -288,7 +292,7 @@
        </div>
      </div>
 
-     <!-- Tab Minyak -->
+     <!-- Tab 2: Minyak -->
      <div id="tabContentMinyak" class="hidden">
        <div class="overflow-x-auto">
          <table class="w-full text-left border-collapse text-sm">
@@ -316,7 +320,7 @@
    </div>
  </main>
 
- <!-- Modal Servis Seterusnya -->
+ <!-- Modal Kriteria Servis Seterusnya -->
  <div id="modalServisSeterusnya" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -338,7 +342,7 @@
    </div>
  </div>
 
- <!-- Modal Servis (Edit / Tambah) -->
+ <!-- Modal Servis (Tambah & Edit) -->
  <div id="modalServis" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -512,43 +516,108 @@
    </div>
  </div>
 
- <!-- Modal Pusat Privasi & Keselamatan Data -->
+ <!-- Modal Pusat Privasi & Keselamatan Data (LENGKAP V42) -->
  <div id="modalKeselamatan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
-   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
-       <div class="flex items-center gap-2">
-         <span class="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow">
+       <div class="flex items-center gap-2.5">
+         <span class="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow">
            <i class="fa-solid fa-shield-halved"></i>
          </span>
-         <h3 class="font-bold text-sm sm:text-base">Pusat Privasi & Keselamatan Data</h3>
+         <div>
+           <h3 class="font-bold text-sm sm:text-base leading-tight">Pusat Privasi & Pengurusan Data</h3>
+           <p class="text-[11px] text-slate-400">Sandaran luar talian, pemulihan data dan kawalan padam khusus</p>
+         </div>
        </div>
        <button type="button" onclick="tutupModalKeselamatan()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
          <i class="fa-solid fa-xmark"></i>
        </button>
      </div>
 
-     <div class="p-5 space-y-4 text-xs">
-       <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
-         <h4 class="font-bold text-slate-900 flex items-center gap-2">
-           <i class="fa-solid fa-file-shield text-blue-600"></i>
-           Fail Sandaran Luar Talian (.JSON)
-         </h4>
-         <p class="text-slate-500 leading-relaxed">
-           Muat turun salinan penuh rekod ke komputer anda untuk sandaran luar talian atau pulihkan sistem daripada fail sandaran terdahulu.
+     <div class="overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+       <!-- Seksyen 1: Sandaran Fail JSON -->
+       <div class="border border-slate-200 bg-slate-50/70 rounded-xl p-4 space-y-3">
+         <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+           <div class="flex items-center gap-2">
+             <span class="p-1.5 bg-blue-100 text-blue-700 rounded-lg"><i class="fa-solid fa-file-shield text-xs"></i></span>
+             <h4 class="font-bold text-slate-900 text-xs">Fail Sandaran Luar Talian (.JSON)</h4>
+           </div>
+           <span class="text-[10px] text-slate-500 font-medium">Bebas Internet</span>
+         </div>
+         <p class="text-[11px] text-slate-500 leading-relaxed">
+           Muat turun salinan penuh rekod ke komputer anda atau pulihkan sistem daripada fail sandaran tanpa sambungan internet.
          </p>
-         <div class="grid grid-cols-2 gap-2 pt-1">
-           <button onclick="eksportBackupJSON()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
-             <i class="fa-solid fa-cloud-arrow-down"></i> Muat Turun
+         <div class="grid grid-cols-2 gap-2.5 pt-1">
+           <button onclick="eksportBackupJSON()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+             <i class="fa-solid fa-cloud-arrow-down"></i>
+             <span>Muat Turun Backup</span>
            </button>
-           <button onclick="document.getElementById('inputRestoreJSON').click()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
-             <i class="fa-solid fa-cloud-arrow-up"></i> Pulihkan Fail
+           <button onclick="document.getElementById('inputRestoreJSON').click()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+             <i class="fa-solid fa-cloud-arrow-up"></i>
+             <span>Pulihkan Backup</span>
            </button>
          </div>
        </div>
 
-       <div class="flex justify-end pt-2">
-         <button type="button" onclick="tutupModalKeselamatan()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition cursor-pointer">Tutup</button>
+       <!-- Seksyen 2: Auto-Sandaran Pelayar -->
+       <div class="border border-blue-200 bg-blue-50/60 rounded-xl p-3.5 flex items-center justify-between gap-3">
+         <div>
+           <h5 class="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+             <i class="fa-solid fa-clock-rotate-left text-blue-600"></i>
+             Salinan Auto-Sandaran Pelayar
+           </h5>
+           <p id="infoAutoBackup" class="text-[11px] text-blue-800 mt-0.5">Tersedia sekiranya berlaku kehilangan data.</p>
+         </div>
+         <button onclick="pulihkanAutoBackup()" class="text-xs bg-blue-700 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-xs whitespace-nowrap cursor-pointer">
+           Pulihkan
+         </button>
        </div>
+
+       <!-- Seksyen 3: Kawalan Pembersihan Berasingan -->
+       <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white">
+         <div class="flex items-center gap-2 pb-2 border-b border-slate-200">
+           <span class="p-1.5 bg-rose-100 text-rose-700 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-xs"></i></span>
+           <h4 class="font-bold text-slate-900 text-xs">Zon Kawalan Padam Rekod (Dilindungi Kata Kunci)</h4>
+         </div>
+
+         <div class="space-y-2 pt-1">
+           <div class="p-2.5 bg-amber-50/50 border border-amber-200 rounded-lg flex items-center justify-between gap-2">
+             <div>
+               <span class="font-bold text-amber-900 block text-xs">Padam Rekod Belanja Minyak Sahaja</span>
+               <span class="text-[10px] text-slate-500">Rekod servis kekal selamat.</span>
+             </div>
+             <button onclick="sahkanTindakanKritikal('KOSONGKAN_MINYAK')" class="text-[11px] bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+               Padam Minyak
+             </button>
+           </div>
+
+           <div class="p-2.5 bg-blue-50/50 border border-blue-200 rounded-lg flex items-center justify-between gap-2">
+             <div>
+               <span class="font-bold text-blue-900 block text-xs">Padam Rekod Penyelenggaraan Sahaja</span>
+               <span class="text-[10px] text-slate-500">Rekod minyak kekal selamat.</span>
+             </div>
+             <button onclick="sahkanTindakanKritikal('KOSONGKAN_SERVIS')" class="text-[11px] bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+               Padam Servis
+             </button>
+           </div>
+
+           <div class="p-2.5 bg-rose-50/50 border border-rose-200 rounded-lg flex items-center justify-between gap-2">
+             <div>
+               <span class="font-bold text-rose-900 block text-xs">Kosongkan Semua Rekod (Reset Penuh)</span>
+               <span class="text-[10px] text-slate-500">Memadam semua rekod untuk mula semula.</span>
+             </div>
+             <button onclick="sahkanTindakanKritikal('KOSONGKAN')" class="text-[11px] bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+               Kosongkan Semua
+             </button>
+           </div>
+         </div>
+       </div>
+     </div>
+
+     <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-end">
+       <button type="button" onclick="tutupModalKeselamatan()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs transition cursor-pointer">
+         Tutup
+       </button>
      </div>
    </div>
  </div>
@@ -676,6 +745,7 @@
 
        populatePlatFilter();
        renderAll();
+       ciptaAutoBackup();
        setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
      }
    } catch(e) {
@@ -866,6 +936,34 @@
    });
  }
 
+ function bukaModalServis(prefillPlat, prefillKategori) {
+   populatePlatFilter();
+   const tarikhInput = document.getElementById('mTarikhServis');
+   if (tarikhInput && !tarikhInput.value) {
+     tarikhInput.value = new Date().toISOString().split('T')[0];
+   }
+   const modal = document.getElementById('modalServis');
+   if (modal) {
+     modal.classList.remove('hidden');
+     modal.classList.add('flex');
+   }
+   document.getElementById('tajukModalServis').innerText = "Rekod Penyelenggaraan";
+   document.getElementById('btnTeksSimpanServis').innerText = "Simpan Servis";
+   idSedangDieditServis = null;
+   
+   const selPlat = document.getElementById('mNoPlatServis');
+   const curPlat = prefillPlat || document.getElementById('filterPlat')?.value;
+   if (curPlat && curPlat !== 'ALL' && selPlat) {
+     selPlat.value = curPlat;
+   }
+   if (prefillKategori) {
+     const selKat = document.getElementById('mKategori');
+     if (selKat) selKat.value = prefillKategori;
+   }
+   kiraJumlahKeseluruhanServis();
+   kiraServisSeterusnya();
+ }
+
  function editRekodServis(id) {
    const item = datasetServis.find(d => String(d.id) === String(id));
    if (!item) return;
@@ -896,6 +994,8 @@
    const upah = bersihNombor(document.getElementById('mKosUpah')?.value);
    document.getElementById('lblJumlahBesarServis').innerText = formatRM(alat + upah);
  }
+
+ function kiraServisSeterusnya() {}
 
  function simpanTransaksiServis(e) {
    e.preventDefault();
@@ -953,6 +1053,7 @@
    }
 
    localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
+   ciptaAutoBackup();
    tutupModalServis();
    renderAll();
  }
@@ -1012,11 +1113,13 @@
    }
 
    localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+   ciptaAutoBackup();
    tutupModalMinyak();
    renderAll();
  }
 
  function bukaModalKeselamatan() {
+   updateInfoAutoBackupText();
    const m = document.getElementById('modalKeselamatan');
    if (m) {
      m.classList.remove('hidden');
@@ -1029,6 +1132,90 @@
    if (m) {
      m.classList.add('hidden');
      m.classList.remove('flex');
+   }
+ }
+
+ function ciptaAutoBackup() {
+   const backupPayload = {
+     tarikhSimpan: new Date().toLocaleString('ms-MY'),
+     servis: datasetServis,
+     minyak: datasetMinyak,
+     kenderaan: datasetKenderaan
+   };
+   localStorage.setItem('penyelenggaraan_autobackup_v41', JSON.stringify(backupPayload));
+   updateInfoAutoBackupText();
+ }
+
+ function updateInfoAutoBackupText() {
+   const el = document.getElementById('infoAutoBackup');
+   if (!el) return;
+   const backupRaw = localStorage.getItem('penyelenggaraan_autobackup_v41');
+   if (backupRaw) {
+     try {
+       const parsed = JSON.parse(backupRaw);
+       el.innerText = `Salinan terakhir: ${parsed.tarikhSimpan} (${parsed.servis.length} servis, ${parsed.minyak.length} minyak).`;
+     } catch(e) {
+       el.innerText = 'Salinan sandaran tersedia.';
+     }
+   }
+ }
+
+ function pulihkanAutoBackup() {
+   const backupRaw = localStorage.getItem('penyelenggaraan_autobackup_v41');
+   if (!backupRaw) return alert("Tiada salinan ditemui.");
+   const parsed = JSON.parse(backupRaw);
+   if (confirm(`Pulihkan data daripada salinan ${parsed.tarikhSimpan}?`)) {
+     datasetServis = parsed.servis || [];
+     datasetMinyak = parsed.minyak || [];
+     datasetKenderaan = parsed.kenderaan || [];
+     localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
+     localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+     localStorage.setItem('penyelenggaraan_db_kenderaan_v41', JSON.stringify(datasetKenderaan));
+     tutupModalKeselamatan();
+     populatePlatFilter();
+     renderAll();
+     alert("Data berjaya dipulihkan daripada auto-sandaran!");
+   }
+ }
+
+ function sahkanTindakanKritikal(tindakan) {
+   if (tindakan === 'KOSONGKAN_MINYAK') {
+     const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD BELANJA MINYAK?\n\n(Rekod penyelenggaraan servis anda KEKAL SELAMAT).\n\nSila taipkan 'MINYAK' untuk mengesahkan:");
+     if (sah === 'MINYAK') {
+       ciptaAutoBackup();
+       datasetMinyak = [];
+       localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+       tutupModalKeselamatan();
+       populatePlatFilter();
+       renderAll();
+       alert("✅ Semua rekod belanja minyak telah dipadam. Rekod servis kekal selamat!");
+     }
+   } else if (tindakan === 'KOSONGKAN_SERVIS') {
+     const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD PENYELENGGARAAN?\n\n(Rekod belanja minyak anda KEKAL SELAMAT).\n\nSila taipkan 'SERVIS' untuk mengesahkan:");
+     if (sah === 'SERVIS') {
+       ciptaAutoBackup();
+       datasetServis = [];
+       localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
+       tutupModalKeselamatan();
+       populatePlatFilter();
+       renderAll();
+       alert("✅ Semua rekod penyelenggaraan telah dipadam. Rekod minyak kekal selamat!");
+     }
+   } else if (tindakan === 'KOSONGKAN') {
+     const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD TRANSAKSI (Servis & Minyak)?\n\nSila taipkan 'PADAM' untuk mengesahkan:");
+     if (sah === 'PADAM') {
+       ciptaAutoBackup();
+       datasetServis = [];
+       datasetMinyak = [];
+       datasetKenderaan = [];
+       localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
+       localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+       localStorage.setItem('penyelenggaraan_db_kenderaan_v41', JSON.stringify(datasetKenderaan));
+       tutupModalKeselamatan();
+       populatePlatFilter();
+       renderAll();
+       alert("Semua rekod berjaya dikosongkan.");
+     }
    }
  }
 
@@ -1052,6 +1239,7 @@
      try {
        const imported = JSON.parse(e.target.result);
        if (imported.servis || Array.isArray(imported)) {
+         ciptaAutoBackup();
          datasetServis = imported.servis || imported;
          datasetMinyak = imported.minyak || [];
          datasetKenderaan = imported.kenderaan || [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
@@ -1281,6 +1469,10 @@
    });
  }
 
+ function bukaModalTetapan() {
+   alert("✅ Tetapan Polisi Aktif: SST 8% atas Upah & Pembundaran 5 Sen Rasmi BNM.");
+ }
+
  function initData() {
    try {
      const sServis = localStorage.getItem('penyelenggaraan_db_servis_v41');
@@ -1300,6 +1492,7 @@
 
    populatePlatFilter();
    renderAll();
+   ciptaAutoBackup();
    segerakDariAwan();
  }
 
