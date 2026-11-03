@@ -21,6 +21,8 @@
     header, .no-print { display: none !important; }
     body { background-color: #ffffff; }
     main { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    .shadow-sm, .shadow-md, .shadow-2xl { box-shadow: none !important; }
+    .border { border-color: #e2e8f0 !important; }
   }
   th.sortable:hover { background-color: #1e293b; cursor: pointer; }
   .tab-active { border-bottom: 2px solid #2563eb; color: #1e40af; font-weight: 700; }
@@ -46,6 +48,7 @@
        </div>
      </div>
 
+     <!-- Actions -->
      <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
        <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs">
          <i class="fa-solid fa-car text-slate-400"></i>
@@ -85,25 +88,22 @@
        </div>
 
        <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-1 text-xs shadow-sm">
-         <button onclick="eksportExcel()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer">
+         <button onclick="eksportExcel()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Muat Turun Excel (.csv)">
            <i class="fa-solid fa-file-excel text-emerald-400"></i> Excel
          </button>
-         <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer">
+         <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer" title="Cetak Ringkasan Eksekutif A4">
            <i class="fa-solid fa-print text-indigo-200"></i> A4
          </button>
-         <button onclick="bukaModalTetapan()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition mr-1 cursor-pointer">
-           <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan
-         </button>
-         <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition cursor-pointer">
+         <button onclick="segerakDariAwan()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded font-semibold transition cursor-pointer" title="Segerak Data Terkini dari Google Sheets">
            <i class="fa-solid fa-arrows-rotate text-sky-200"></i> Segerak
          </button>
        </div>
 
        <div class="flex items-center gap-2">
-         <button onclick="bukaModalMinyak()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
+         <button onclick="bukaModalMinyak()" class="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
            <i class="fa-solid fa-gas-pump"></i> + Kos Minyak
          </button>
-         <button onclick="bukaModalServis()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
+         <button onclick="bukaModalServis()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
            <i class="fa-solid fa-plus-circle"></i> + Servis
          </button>
        </div>
@@ -113,6 +113,7 @@
 
  <!-- Main Content -->
  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+
    <!-- Peringatan Servis -->
    <div id="serviceReminderBox" class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-blue-800">
      <div class="flex items-center gap-3">
@@ -131,41 +132,44 @@
        <button onclick="bukaModalServisSeterusnya()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg transition font-bold shadow border border-indigo-400 cursor-pointer">
          <i class="fa-solid fa-calendar-check mr-1"></i> Servis Seterusnya
        </button>
+       <button onclick="bukaModalServis()" class="text-xs bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1.5 rounded-lg transition font-medium cursor-pointer">
+         Jadualkan Servis
+       </button>
      </div>
    </div>
 
    <!-- KPI Cards -->
    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-       <span class="text-[11px] font-bold text-slate-500 uppercase">Kos Keseluruhan</span>
+     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
+       <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kos Keseluruhan</span>
        <h3 id="kpiTotalOperasi" class="text-xl font-extrabold text-slate-900 mt-2">RM 0.00</h3>
        <p id="kpiTarikhLabel" class="text-[11px] text-slate-500 mt-0.5 truncate">Servis + Minyak</p>
      </div>
-     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-       <span class="text-[11px] font-bold text-slate-500 uppercase">Penyelenggaraan</span>
+     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
+       <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Penyelenggaraan</span>
        <h3 id="kpiTotalServis" class="text-xl font-extrabold text-blue-600 mt-2">RM 0.00</h3>
        <p id="kpiPecahanServis" class="text-[11px] text-blue-700 font-medium mt-0.5 truncate">Alat: RM 0 | Upah: RM 0</p>
      </div>
-     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-       <span class="text-[11px] font-bold text-slate-500 uppercase">Belanja Minyak</span>
+     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
+       <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Belanja Minyak</span>
        <h3 id="kpiTotalMinyak" class="text-xl font-extrabold text-amber-600 mt-2">RM 0.00</h3>
        <p id="kpiLiterMinyak" class="text-[11px] text-amber-700 font-medium mt-0.5 truncate">0 Liter (0 isian)</p>
      </div>
-     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-       <span class="text-[11px] font-bold text-slate-500 uppercase">Kecekapan Petrol</span>
+     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
+       <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kecekapan Petrol</span>
        <h3 id="kpiKecekapanMinyak" class="text-xl font-extrabold text-emerald-600 mt-2">- km/L</h3>
        <p id="kpiL100km" class="text-[11px] text-emerald-700 font-medium mt-0.5 truncate">Purata penggunaan bahan api</p>
      </div>
-     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-       <span class="text-[11px] font-bold text-slate-500 uppercase">Kos Per KM (CPK)</span>
+     <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
+       <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kos Per KM (CPK)</span>
        <h3 id="kpiKosPerKm" class="text-xl font-extrabold text-indigo-700 mt-2">RM 0.00/km</h3>
        <p id="kpiPecahanNisbah" class="text-[11px] text-indigo-600 font-medium mt-0.5 truncate">Minyak 0% : Servis 0%</p>
      </div>
    </div>
 
    <!-- Tabs -->
-   <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-     <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-slate-50">
+   <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden">
+     <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-slate-50/50">
        <div class="flex items-center gap-6 text-sm font-semibold">
          <button onclick="tukarTab('servis')" id="tabBtnServis" class="tab-active pb-2 transition flex items-center gap-2 cursor-pointer">
            <i class="fa-solid fa-screwdriver-wrench text-blue-600"></i>
@@ -179,7 +183,7 @@
          </button>
        </div>
        <div class="flex items-center no-print">
-         <button onclick="bukaModalKeselamatan()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-2">
+         <button onclick="bukaModalKeselamatan()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-2 cursor-pointer">
            <i class="fa-solid fa-lock text-slate-500"></i>
            <span>Pusat Privasi & Keselamatan Data</span>
          </button>
@@ -187,14 +191,14 @@
        </div>
      </div>
 
-     <!-- Tab Servis -->
+     <!-- Tab 1: Servis -->
      <div id="tabContentServis" class="block">
        <div class="overflow-x-auto">
          <table class="w-full text-left border-collapse text-sm">
            <thead>
              <tr class="bg-slate-900 text-slate-200 text-xs uppercase tracking-wider">
-               <th class="py-3 px-4">Tarikh</th>
-               <th class="py-3 px-4">Plat</th>
+               <th onclick="toggleSort('tarikh')" class="py-3 px-4 sortable select-none">Tarikh</th>
+               <th onclick="toggleSort('plat')" class="py-3 px-4 sortable select-none">Plat</th>
                <th class="py-3 px-4 text-right">Odometer Semasa</th>
                <th class="py-3 px-4 text-center bg-slate-800">Sasaran Seterusnya</th>
                <th class="py-3 px-4">Kategori / Sistem</th>
@@ -202,7 +206,7 @@
                <th class="py-3 px-4">Alat Ganti Digunakan</th>
                <th class="py-3 px-4 text-right">Kos Alat</th>
                <th class="py-3 px-4 text-right">Kos Upah</th>
-               <th class="py-3 px-4 text-right">Jumlah</th>
+               <th onclick="toggleSort('kos')" class="py-3 px-4 text-right sortable select-none">Jumlah</th>
                <th class="py-3 px-4">Bengkel</th>
                <th class="py-3 px-4 text-center no-print">Tindakan</th>
              </tr>
@@ -211,11 +215,11 @@
          </table>
        </div>
        <div id="noDataServisText" class="hidden text-center py-10 text-slate-400 text-sm">
-         Tiada rekod penyelenggaraan ditemui.
+         Tiada rekod penyelenggaraan ditemui bagi kriteria penapis ini.
        </div>
      </div>
 
-     <!-- Tab Minyak -->
+     <!-- Tab 2: Minyak -->
      <div id="tabContentMinyak" class="hidden">
        <div class="overflow-x-auto">
          <table class="w-full text-left border-collapse text-sm">
@@ -223,12 +227,12 @@
              <tr class="bg-slate-900 text-slate-200 text-xs uppercase tracking-wider">
                <th class="py-3 px-4">Tarikh</th>
                <th class="py-3 px-4">No. Plat</th>
-               <th class="py-3 px-4">Stesen</th>
-               <th class="py-3 px-4">Bahan Api</th>
-               <th class="py-3 px-4 text-right">Liter</th>
-               <th class="py-3 px-4 text-right">Odometer</th>
-               <th class="py-3 px-4 text-right">Kecekapan</th>
-               <th class="py-3 px-4 text-right">Kos (RM)</th>
+               <th class="py-3 px-4">Stesen / Lokasi</th>
+               <th class="py-3 px-4">Jenis & Subsidi</th>
+               <th class="py-3 px-4 text-right">Liter (L)</th>
+               <th class="py-3 px-4 text-right">Odometer (km)</th>
+               <th class="py-3 px-4 text-right text-emerald-300">Kecekapan</th>
+               <th class="py-3 px-4 text-right">Kos Minyak (RM)</th>
                <th class="py-3 px-4">Catatan</th>
                <th class="py-3 px-4 text-center no-print">Tindakan</th>
              </tr>
@@ -237,7 +241,7 @@
          </table>
        </div>
        <div id="noDataMinyakText" class="hidden text-center py-10 text-slate-400 text-sm">
-         Tiada rekod isian minyak ditemui.
+         Tiada rekod belanja minyak ditemui.
        </div>
      </div>
    </div>
@@ -248,7 +252,7 @@
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94vh] flex flex-col overflow-hidden">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
        <h3 id="tajukModalServis" class="font-bold text-sm sm:text-base">Rekod Penyelenggaraan</h3>
-       <button type="button" onclick="tutupModalServis()" class="text-slate-400 hover:text-white text-lg p-1">
+       <button type="button" onclick="tutupModalServis()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
          <i class="fa-solid fa-xmark"></i>
        </button>
      </div>
@@ -260,14 +264,22 @@
          </div>
          <div>
            <label class="block text-xs font-semibold text-slate-700 mb-1">No. Plat Kenderaan</label>
-           <select id="mNoPlatServis" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none bg-white font-bold"></select>
+           <div class="flex gap-2">
+             <select id="mNoPlatServis" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none bg-white font-bold"></select>
+             <button type="button" onclick="promptDaftarPlatBaharu('servis')" class="px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 text-xs font-bold rounded-lg whitespace-nowrap transition cursor-pointer">
+               + Plat
+             </button>
+           </div>
          </div>
        </div>
 
        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
          <div>
-           <label class="block text-xs font-semibold text-slate-700 mb-1">Bacaan Odometer Semasa (km) <span class="text-slate-400 font-normal">(Pilihan)</span></label>
-           <input type="number" step="1" min="0" id="mOdoSemasa" oninput="kiraServisSeterusnya()" placeholder="cth: 40000 (kekal jika tidak diubah)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-mono">
+           <div class="flex justify-between items-center mb-1">
+             <label class="block text-xs font-semibold text-slate-700">Bacaan Odometer Semasa (km) <span class="text-slate-400 font-normal">(Pilihan)</span></label>
+             <span class="text-[10px] text-indigo-600 font-medium">Kekal jika tidak diubah</span>
+           </div>
+           <input type="number" step="1" min="0" id="mOdoSemasa" oninput="kiraServisSeterusnya()" placeholder="cth: 40000 (boleh dibiarkan kosong)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-mono">
          </div>
          <div>
            <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Aktiviti</label>
@@ -283,51 +295,178 @@
            <label class="block text-xs font-semibold text-slate-700 mb-1">Kategori / Sistem</label>
            <select id="mKategori" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-medium">
              <option value="Service enjin">Service enjin</option>
+             <option value="Clutch dan Gear">Clutch dan Gear</option>
+             <option value="Sistem brek">Sistem brek</option>
              <option value="Servis Motosikal">Servis Motosikal</option>
              <option value="Palam pencucuh & Penapis udara">Palam pencucuh & Penapis udara</option>
              <option value="Tali sawat">Tali sawat</option>
              <option value="Sistem aircond">Sistem aircond</option>
              <option value="Sistem tayar">Sistem tayar</option>
              <option value="Sistem elektrik">Sistem elektrik & Bateri</option>
-             <option value="Sistem brek">Sistem brek</option>
              <option value="Lain-lain">Lain-lain</option>
            </select>
          </div>
          <div>
            <label class="block text-xs font-semibold text-slate-700 mb-1">Bengkel</label>
-           <input type="text" id="mBengkel" placeholder="cth: Bengkel Maju Auto" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+           <input type="text" id="mBengkel" placeholder="cth: Yee Peng Tyres / Bengkel Maju" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
          </div>
        </div>
 
        <div>
          <label class="block text-xs font-semibold text-slate-700 mb-1">Simptom / Kerosakan / Catatan Servis</label>
-         <input type="text" id="mSimptom" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+         <input type="text" id="mSimptom" placeholder="cth: Tukar Minyak Enjin / Brek Bunyi (Pilihan)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+       </div>
+
+       <div>
+         <label class="block text-xs font-semibold text-slate-700 mb-1">Perincian Alat Ganti / Item Digunakan</label>
+         <input type="text" id="mAlatGanti" placeholder="cth: Clutch kit set, Minyak Enjin 5W-30 (Pilihan)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
        </div>
 
        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
          <div>
            <label class="block text-xs font-semibold text-slate-700 mb-1">Kos Alat Ganti (RM)</label>
-           <input type="number" step="0.01" min="0" id="mKosAlat" value="0.00" oninput="kiraJumlahKeseluruhanServis()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-bold">
+           <input type="number" step="0.01" min="0" id="mKosAlat" value="0.00" oninput="kiraJumlahKeseluruhanServis()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-bold font-mono">
          </div>
          <div>
-           <label class="block text-xs font-semibold text-slate-700 mb-1">Kos Upah (RM)</label>
-           <input type="number" step="0.01" min="0" id="mKosUpah" value="0.00" oninput="kiraJumlahKeseluruhanServis()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-bold">
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Kos Upah Pasang (RM)</label>
+           <input type="number" step="0.01" min="0" id="mKosUpah" value="0.00" oninput="kiraJumlahKeseluruhanServis()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-bold font-mono">
          </div>
        </div>
 
-       <div class="bg-blue-50/80 p-3 rounded-xl border border-blue-200 text-xs flex justify-between items-center">
-         <span class="font-bold text-slate-700">Jumlah Bersih:</span>
-         <span id="lblJumlahBesarServis" class="font-extrabold text-blue-900 text-base font-mono">RM 0.00</span>
+       <div class="bg-blue-50/80 p-3.5 rounded-xl border border-blue-200 text-xs flex justify-between items-center">
+         <span class="font-extrabold text-slate-800 text-sm">Jumlah Bayaran Bersih (Nett Total):</span>
+         <span id="lblJumlahBesarServis" class="font-extrabold text-blue-900 text-lg font-mono">RM 0.00</span>
        </div>
 
        <div class="flex gap-3 pt-2">
-         <button type="button" onclick="tutupModalServis()" class="w-1/3 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg text-sm">Batal</button>
-         <button type="submit" class="w-2/3 py-2 bg-emerald-600 text-white font-bold rounded-lg text-sm shadow">Simpan</button>
+         <button type="button" onclick="tutupModalServis()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-sm cursor-pointer">Batal</button>
+         <button type="submit" class="w-2/3 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-sm shadow cursor-pointer">
+           <i class="fa-solid fa-check mr-1"></i> <span id="btnTeksSimpanServis">Simpan Servis</span>
+         </button>
        </div>
      </form>
    </div>
  </div>
 
+ <!-- Modal Minyak -->
+ <div id="modalMinyak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
+     <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+       <h3 id="tajukModalMinyak" class="font-bold text-sm sm:text-base">Rekod Belanja Minyak</h3>
+       <button type="button" onclick="tutupModalMinyak()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
+         <i class="fa-solid fa-xmark"></i>
+       </button>
+     </div>
+     <form id="formMinyak" onsubmit="simpanTransaksiMinyak(event)" class="overflow-y-auto p-6 space-y-4">
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Tarikh Isian</label>
+           <input type="date" id="mTarikhMinyak" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+         </div>
+         <div>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">No. Plat Kenderaan</label>
+           <select id="mNoPlatMinyak" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-bold bg-white"></select>
+         </div>
+       </div>
+
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Stesen / Lokasi</label>
+           <select id="mStesen" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+             <option value="Petronas">Petronas</option>
+             <option value="Shell">Shell</option>
+             <option value="Petron">Petron</option>
+             <option value="Caltex">Caltex</option>
+             <option value="BHPetrol">BHPetrol</option>
+             <option value="Lain-lain">Lain-lain</option>
+           </select>
+         </div>
+         <div>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Bahan Api</label>
+           <select id="mJenisMinyak" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+             <option value="RON95">RON95</option>
+             <option value="RON97">RON97</option>
+             <option value="Diesel B10">Diesel</option>
+             <option value="Euro5 Diesel">Euro 5 Diesel</option>
+           </select>
+         </div>
+       </div>
+
+       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Kos Minyak (RM)</label>
+           <input type="number" step="0.01" min="1" id="mJumlahBayaran" placeholder="cth: 80.00" required class="w-full text-sm px-3 py-2 border border-amber-300 bg-amber-50/30 rounded-lg font-bold font-mono">
+         </div>
+         <div>
+           <label class="block text-xs font-semibold text-slate-700 mb-1">Liter (L) (Pilihan)</label>
+           <input type="number" step="0.01" min="0" id="mLiter" placeholder="cth: 39.02" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-mono">
+         </div>
+       </div>
+
+       <div>
+         <label class="block text-xs font-semibold text-slate-700 mb-1">Odometer (km) (Pilihan)</label>
+         <input type="number" step="1" min="0" id="mOdometer" placeholder="cth: 45200" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg font-mono">
+       </div>
+
+       <div>
+         <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan (Pilihan)</label>
+         <input type="text" id="mCatatanMinyak" placeholder="cth: Isian penuh" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg">
+       </div>
+
+       <div class="flex gap-3 pt-2">
+         <button type="button" onclick="tutupModalMinyak()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-sm cursor-pointer">Batal</button>
+         <button type="submit" class="w-2/3 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg text-sm shadow cursor-pointer">
+           <i class="fa-solid fa-check mr-1"></i> <span id="btnTeksSimpanMinyak">Simpan Kos Minyak</span>
+         </button>
+       </div>
+     </form>
+   </div>
+ </div>
+
+ <!-- Modal Pusat Privasi & Keselamatan Data -->
+ <div id="modalKeselamatan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+     <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+       <div class="flex items-center gap-2">
+         <span class="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow">
+           <i class="fa-solid fa-shield-halved"></i>
+         </span>
+         <h3 class="font-bold text-sm sm:text-base">Pusat Privasi & Keselamatan Data</h3>
+       </div>
+       <button type="button" onclick="tutupModalKeselamatan()" class="text-slate-400 hover:text-white text-lg p-1 cursor-pointer">
+         <i class="fa-solid fa-xmark"></i>
+       </button>
+     </div>
+
+     <div class="p-5 space-y-4 text-xs">
+       <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+         <h4 class="font-bold text-slate-900 flex items-center gap-2">
+           <i class="fa-solid fa-file-shield text-blue-600"></i>
+           Fail Sandaran Luar Talian (.JSON)
+         </h4>
+         <p class="text-slate-500 leading-relaxed">
+           Muat turun salinan data ke komputer anda untuk sandaran selamat atau pulihkan sistem daripada fail sandaran terdahulu.
+         </p>
+         <div class="grid grid-cols-2 gap-2 pt-1">
+           <button onclick="eksportBackupJSON()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+             <i class="fa-solid fa-cloud-arrow-down"></i> Muat Turun
+           </button>
+           <button onclick="document.getElementById('inputRestoreJSON').click()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
+             <i class="fa-solid fa-cloud-arrow-up"></i> Pulihkan Fail
+           </button>
+         </div>
+       </div>
+
+       <div class="flex justify-end pt-2">
+         <button type="button" onclick="tutupModalKeselamatan()" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition cursor-pointer">
+           Tutup
+         </button>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- Javascript -->
  <script>
  const CLOUD_API_URL = "https://script.google.com/macros/s/AKfycbx6ry-Krjw4KiqjZ-L5Ikljn5uhM6PphIFwoPtPFTDX_6CaeiwedmT6KbbRFRFmuH6c2w/exec";
 
@@ -335,6 +474,7 @@
  let datasetMinyak = [];
  let datasetKenderaan = [];
  let activeTab = 'servis';
+ let currentSort = 'tarikh_desc';
  let idSedangDieditServis = null;
  let idSedangDieditMinyak = null;
 
@@ -376,10 +516,17 @@
    return '';
  }
 
+ function setStatusAwan(teks, warnaClass) {
+   const el = document.getElementById('badgeStatusAwan');
+   if (el) {
+     el.className = `inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${warnaClass}`;
+     el.innerHTML = teks;
+   }
+ }
+
  async function segerakDariAwan() {
    if (!CLOUD_API_URL) return;
-   const badge = document.getElementById('badgeStatusAwan');
-   if (badge) badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> Menyegerak...';
+   setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> Menyegerak...', 'bg-amber-900/60 text-amber-200 border border-amber-500/40');
 
    try {
      const res = await fetch(CLOUD_API_URL);
@@ -398,73 +545,234 @@
              ...d,
              id: bersihNombor(cariNilaiTepat(d, ['id', 'ID'])) || (Date.now() + idx),
              tarikh: String(cariNilaiTepat(d, ['tarikh', 'Tarikh', 'date']) || '').split('T')[0],
-             plat: String(cariNilaiTepat(d, ['plat', 'no plat', 'kenderaan']) || '').trim().toUpperCase(),
-             odometer: bersihNombor(cariNilaiTepat(d, ['odometer', 'odo', 'meter'])),
+             plat: String(cariNilaiTepat(d, ['plat', 'no plat', 'no. plat', 'kenderaan']) || '').trim().toUpperCase(),
+             odometer: bersihNombor(cariNilaiTepat(d, ['odometer', 'odo', 'meter', 'bacaan meter'])),
+             selangKm: bersihNombor(cariNilaiTepat(d, ['selangkm', 'selang jarak'])) || 10000,
+             selangBulan: bersihNombor(cariNilaiTepat(d, ['selangbulan', 'selang masa'])) || 6,
+             odoSeterusnya: bersihNombor(cariNilaiTepat(d, ['odoseterusnya', 'sasaran km'])),
+             tarikhSeterusnya: String(cariNilaiTepat(d, ['tarikhseterusnya', 'sasaran tarikh']) || '-').split('T')[0],
+             aktiviti: String(cariNilaiTepat(d, ['aktiviti']) || 'Servis Berkala'),
+             kategori: String(cariNilaiTepat(d, ['kategori']) || '-'),
+             simptom: String(cariNilaiTepat(d, ['simptom', 'kerosakan']) || '-'),
+             alat: String(cariNilaiTepat(d, ['alat', 'alat ganti', 'alatganti', 'alat ganti digunakan']) || '-'),
              kosAlat: valAlat,
              kosUpah: valUpah,
              jumlah: valJumlah,
-             simptom: String(cariNilaiTepat(d, ['simptom', 'kerosakan']) || '-'),
-             alat: String(cariNilaiTepat(d, ['alat', 'alat ganti', 'alatganti']) || '-'),
-             bengkel: String(cariNilaiTepat(d, ['bengkel']) || '-')
+             bengkel: String(cariNilaiTepat(d, ['bengkel']) || '-'),
+             noBil: String(cariNilaiTepat(d, ['nobil', 'no bil', 'bil', 'invois']) || ''),
+             catatan: String(cariNilaiTepat(d, ['catatan']) || '-')
            };
          });
          localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
        }
+
+       if (Array.isArray(data.minyak) && data.minyak.length > 0) {
+         datasetMinyak = data.minyak.map((d, idx) => ({
+           ...d,
+           id: bersihNombor(cariNilaiTepat(d, ['id', 'ID'])) || (Date.now() + 500 + idx),
+           tarikh: String(cariNilaiTepat(d, ['tarikh', 'Tarikh']) || '').split('T')[0],
+           plat: String(cariNilaiTepat(d, ['plat', 'no plat', 'kenderaan']) || '').trim().toUpperCase(),
+           stesen: String(cariNilaiTepat(d, ['stesen']) || 'Petronas'),
+           jenis: String(cariNilaiTepat(d, ['jenis']) || 'RON95'),
+           subsidi: String(cariNilaiTepat(d, ['subsidi']) || 'Bersubsidi'),
+           statusIsian: String(cariNilaiTepat(d, ['statusisian']) || 'Penuh'),
+           liter: bersihNombor(cariNilaiTepat(d, ['liter'])),
+           odometer: bersihNombor(cariNilaiTepat(d, ['odometer', 'odo'])),
+           jumlah: bersihNombor(cariNilaiTepat(d, ['jumlah', 'kos', 'harga', 'kos minyak'])),
+           catatan: String(cariNilaiTepat(d, ['catatan']) || '-')
+         }));
+         localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+       }
+
+       datasetKenderaan = [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
+       localStorage.setItem('penyelenggaraan_db_kenderaan_v41', JSON.stringify(datasetKenderaan));
+
+       populatePlatFilter();
        renderAll();
-       if (badge) badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung';
+       setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terhubung', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
      }
    } catch(e) {
-     if (badge) badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Luar Talian';
+     setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Mod Luar Talian', 'bg-slate-800 text-slate-300 border border-slate-600');
+   }
+ }
+
+ function hantarKeAwan(payload) {
+   if (!CLOUD_API_URL) return;
+   setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> Menyimpan...', 'bg-blue-900/60 text-blue-200 border border-blue-500/40');
+   fetch(CLOUD_API_URL, {
+     method: 'POST',
+     mode: 'no-cors',
+     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+     body: JSON.stringify(payload)
+   }).then(() => {
+     setTimeout(() => {
+       setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Awan Terkini', 'bg-emerald-900/60 text-emerald-200 border border-emerald-500/40');
+     }, 1000);
+   }).catch(() => {
+     setStatusAwan('<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Simpan Tempatan', 'bg-amber-900/60 text-amber-200 border border-amber-500/40');
+   });
+ }
+
+ function populatePlatFilter() {
+   const unikPlat = [...new Set([...datasetKenderaan, ...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean).sort();
+   
+   ['filterPlat', 'mNoPlatServis', 'mNoPlatMinyak'].forEach(id => {
+     const sel = document.getElementById(id);
+     if (!sel) return;
+     const cur = sel.value;
+     sel.innerHTML = id === 'filterPlat' ? '<option value="ALL">Semua Kenderaan</option>' : '';
+     unikPlat.forEach(p => {
+       const opt = document.createElement('option');
+       opt.value = p;
+       opt.innerText = p;
+       sel.appendChild(opt);
+     });
+     if (unikPlat.includes(cur)) sel.value = cur;
+     else if (id !== 'filterPlat' && unikPlat.length > 0) sel.value = unikPlat[0];
+   });
+ }
+
+ function promptDaftarPlatBaharu(target) {
+   const p = prompt("Sila masukkan No. Plat Kenderaan baharu (cth: AGF 8386):");
+   if (p && p.trim()) {
+     const platBersih = p.trim().toUpperCase();
+     if (!datasetKenderaan.includes(platBersih)) {
+       datasetKenderaan.push(platBersih);
+       localStorage.setItem('penyelenggaraan_db_kenderaan_v41', JSON.stringify(datasetKenderaan));
+     }
+     populatePlatFilter();
+     if (target === 'servis') document.getElementById('mNoPlatServis').value = platBersih;
+     else if (target === 'minyak') document.getElementById('mNoPlatMinyak').value = platBersih;
    }
  }
 
  function renderAll() {
-   const filterPlat = document.getElementById('filterPlat')?.value || 'ALL';
-   let data = [...datasetServis];
-   if (filterPlat !== 'ALL') {
-     data = data.filter(d => d.plat === filterPlat);
+   const selectedPlat = document.getElementById('filterPlat')?.value || 'ALL';
+   const modeTempoh = document.getElementById('filterTempoh')?.value || 'SEMUA';
+   const tarikhDari = document.getElementById('filterTarikhDari')?.value;
+   const tarikhHingga = document.getElementById('filterTarikhHingga')?.value;
+   currentSort = document.getElementById('sortBy')?.value || 'tarikh_desc';
+
+   let dataServis = [...datasetServis];
+   let dataMinyak = [...datasetMinyak];
+
+   if (selectedPlat !== 'ALL') {
+     dataServis = dataServis.filter(d => d.plat === selectedPlat);
+     dataMinyak = dataMinyak.filter(d => d.plat === selectedPlat);
    }
 
+   if (modeTempoh !== 'SEMUA') {
+     if (tarikhDari) {
+       dataServis = dataServis.filter(d => d.tarikh >= tarikhDari);
+       dataMinyak = dataMinyak.filter(d => d.tarikh >= tarikhDari);
+     }
+     if (tarikhHingga) {
+       dataServis = dataServis.filter(d => d.tarikh <= tarikhHingga);
+       dataMinyak = dataMinyak.filter(d => d.tarikh <= tarikhHingga);
+     }
+   }
+
+   dataServis.sort((a, b) => {
+     if (currentSort === 'tarikh_desc') return new Date(b.tarikh) - new Date(a.tarikh);
+     if (currentSort === 'tarikh_asc') return new Date(a.tarikh) - new Date(b.tarikh);
+     if (currentSort === 'kos_desc') return (b.jumlah || 0) - (a.jumlah || 0);
+     if (currentSort === 'kos_asc') return (a.jumlah || 0) - (b.jumlah || 0);
+     return a.plat.localeCompare(b.plat);
+   });
+
+   dataMinyak.sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
+
+   const totalServis = dataServis.reduce((acc, c) => acc + (c.jumlah || 0), 0);
+   const totalAlat = dataServis.reduce((acc, c) => acc + (c.kosAlat || 0), 0);
+   const totalUpah = dataServis.reduce((acc, c) => acc + (c.kosUpah || 0), 0);
+   const totalMinyak = dataMinyak.reduce((acc, c) => acc + (c.jumlah || 0), 0);
+   const totalLiter = dataMinyak.reduce((acc, c) => acc + (c.liter || 0), 0);
+   const totalOperasi = totalServis + totalMinyak;
+
+   document.getElementById('kpiTotalOperasi').innerText = formatRM(totalOperasi);
+   document.getElementById('kpiTotalServis').innerText = formatRM(totalServis);
+   document.getElementById('kpiPecahanServis').innerText = `Alat: ${formatRM(totalAlat)} | Upah: ${formatRM(totalUpah)}`;
+   document.getElementById('kpiTotalMinyak').innerText = formatRM(totalMinyak);
+   document.getElementById('kpiLiterMinyak').innerText = `${totalLiter.toFixed(1)} Liter (${dataMinyak.length} isian)`;
+   document.getElementById('badgeCountServis').innerText = dataServis.length;
+   document.getElementById('badgeCountMinyak').innerText = dataMinyak.length;
+
+   renderTableServis(dataServis);
+   renderTableMinyak(dataMinyak);
+ }
+
+ function renderTableServis(data) {
    const tbody = document.getElementById('tableServisBody');
    if (!tbody) return;
    tbody.innerHTML = '';
 
-   let totalServis = 0;
-   let totalAlat = 0;
-   let totalUpah = 0;
+   if (data.length === 0) {
+     document.getElementById('noDataServisText').classList.remove('hidden');
+     return;
+   }
+   document.getElementById('noDataServisText').classList.add('hidden');
 
    data.forEach(item => {
-     totalServis += item.jumlah || 0;
-     totalAlat += item.kosAlat || 0;
-     totalUpah += item.kosUpah || 0;
-
      const tr = document.createElement('tr');
      tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+     const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
+       ? `<div class="font-semibold text-blue-900">${item.odoSeterusnya.toLocaleString()} km</div><div class="text-[11px] text-slate-500">${formatTarikh(item.tarikhSeterusnya)}</div>`
+       : `<span class="text-slate-400">-</span>`;
+
      tr.innerHTML = `
-       <td class="py-3 px-4 font-medium">${formatTarikh(item.tarikh)}</td>
-       <td class="py-3 px-4"><span class="bg-slate-800 text-white font-bold text-xs px-2.5 py-1 rounded">${item.plat}</span></td>
-       <td class="py-3 px-4 text-right font-mono">${item.odometer ? item.odometer.toLocaleString() + ' km' : '-'}</td>
-       <td class="py-3 px-4 text-center text-xs text-slate-500">-</td>
+       <td class="py-3 px-4 font-medium whitespace-nowrap">${formatTarikh(item.tarikh)}</td>
+       <td class="py-3 px-4 whitespace-nowrap"><span class="bg-slate-800 text-white font-bold text-xs px-2.5 py-1 rounded font-mono">${item.plat}</span></td>
+       <td class="py-3 px-4 text-right font-mono font-semibold">${item.odometer ? item.odometer.toLocaleString() + ' km' : '-'}</td>
+       <td class="py-3 px-4 text-center bg-blue-50/40 text-xs">${sasaranHtml}</td>
        <td class="py-3 px-4 text-xs font-semibold text-blue-600">${item.kategori || '-'}</td>
        <td class="py-3 px-4 max-w-xs truncate">${item.simptom || '-'}</td>
-       <td class="py-3 px-4 max-w-xs truncate font-medium text-slate-900">${item.alat || '-'}</td>
+       <td class="py-3 px-4 max-w-xs truncate font-medium text-slate-900" title="${item.alat || '-'}">${item.alat || '-'}</td>
        <td class="py-3 px-4 text-right text-emerald-600 font-semibold font-mono">${formatRM(item.kosAlat)}</td>
        <td class="py-3 px-4 text-right text-amber-600 font-semibold font-mono">${formatRM(item.kosUpah)}</td>
-       <td class="py-3 px-4 text-right font-bold font-mono">${formatRM(item.jumlah)}</td>
-       <td class="py-3 px-4 text-xs">${item.bengkel || '-'}</td>
+       <td class="py-3 px-4 text-right font-extrabold text-slate-900 font-mono">${formatRM(item.jumlah)}</td>
+       <td class="py-3 px-4 text-xs font-medium">${item.bengkel || '-'}</td>
        <td class="py-3 px-4 text-center whitespace-nowrap no-print">
-         <button onclick="editRekodServis('${item.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-1.5 rounded-lg border border-blue-200">
+         <button onclick="editRekodServis('${item.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-1.5 rounded-lg border border-blue-200 cursor-pointer" title="Edit Rekod">
            <i class="fa-solid fa-pen-to-square"></i>
          </button>
        </td>
      `;
      tbody.appendChild(tr);
    });
+ }
 
-   document.getElementById('kpiTotalOperasi').innerText = formatRM(totalServis);
-   document.getElementById('kpiTotalServis').innerText = formatRM(totalServis);
-   document.getElementById('kpiPecahanServis').innerText = `Alat: ${formatRM(totalAlat)} | Upah: ${formatRM(totalUpah)}`;
-   document.getElementById('badgeCountServis').innerText = data.length;
+ function renderTableMinyak(data) {
+   const tbody = document.getElementById('tableMinyakBody');
+   if (!tbody) return;
+   tbody.innerHTML = '';
+
+   if (data.length === 0) {
+     document.getElementById('noDataMinyakText').classList.remove('hidden');
+     return;
+   }
+   document.getElementById('noDataMinyakText').classList.add('hidden');
+
+   data.forEach(item => {
+     const tr = document.createElement('tr');
+     tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+     tr.innerHTML = `
+       <td class="py-3 px-4 font-medium whitespace-nowrap">${formatTarikh(item.tarikh)}</td>
+       <td class="py-3 px-4 whitespace-nowrap"><span class="bg-slate-800 text-white font-bold text-xs px-2.5 py-1 rounded font-mono">${item.plat}</span></td>
+       <td class="py-3 px-4 text-xs font-semibold text-amber-800">${item.stesen || '-'}</td>
+       <td class="py-3 px-4 text-xs">${item.jenis || 'RON95'}</td>
+       <td class="py-3 px-4 text-right font-medium">${item.liter ? item.liter.toFixed(2) + ' L' : '-'}</td>
+       <td class="py-3 px-4 text-right font-mono">${item.odometer ? item.odometer.toLocaleString() + ' km' : '-'}</td>
+       <td class="py-3 px-4 text-right text-xs text-slate-400">-</td>
+       <td class="py-3 px-4 text-right font-extrabold text-amber-700 font-mono">${formatRM(item.jumlah)}</td>
+       <td class="py-3 px-4 text-xs text-slate-500 max-w-xs truncate">${item.catatan || '-'}</td>
+       <td class="py-3 px-4 text-center whitespace-nowrap no-print">
+         <button onclick="editRekodMinyak('${item.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-1.5 rounded-lg border border-blue-200 cursor-pointer">
+           <i class="fa-solid fa-pen-to-square"></i>
+         </button>
+       </td>
+     `;
+     tbody.appendChild(tr);
+   });
  }
 
  function editRekodServis(id) {
@@ -473,15 +781,21 @@
 
    idSedangDieditServis = item.id;
    document.getElementById('tajukModalServis').innerText = "Kemaskini Penyelenggaraan";
+   document.getElementById('btnTeksSimpanServis').innerText = "Kemaskini Rekod";
+
    document.getElementById('mTarikhServis').value = item.tarikh || '';
    document.getElementById('mNoPlatServis').value = item.plat || '';
    document.getElementById('mOdoSemasa').value = item.odometer || '';
-   document.getElementById('mSimptom').value = item.simptom || '';
-   document.getElementById('mBengkel').value = item.bengkel || '';
-   document.getElementById('mKosAlat').value = (item.kosAlat || 0).toFixed(2);
-   document.getElementById('mKosUpah').value = (item.kosUpah || 0).toFixed(2);
-   kiraJumlahKeseluruhanServis();
+   document.getElementById('mJenisAktiviti').value = item.aktiviti || 'Servis Berkala';
+   document.getElementById('mKategori').value = item.kategori || 'Service enjin';
+   document.getElementById('mBengkel').value = (item.bengkel && item.bengkel !== '-') ? item.bengkel : '';
+   document.getElementById('mSimptom').value = (item.simptom && item.simptom !== '-') ? item.simptom : '';
+   document.getElementById('mAlatGanti').value = (item.alat && item.alat !== '-') ? item.alat : '';
 
+   document.getElementById('mKosAlat').value = (Math.max(0, Number(item.kosAlat) || 0)).toFixed(2);
+   document.getElementById('mKosUpah').value = (Math.max(0, Number(item.kosUpah) || 0)).toFixed(2);
+
+   kiraJumlahKeseluruhanServis();
    document.getElementById('modalServis').classList.remove('hidden');
    document.getElementById('modalServis').classList.add('flex');
  }
@@ -499,16 +813,24 @@
    const rawOdo = document.getElementById('mOdoSemasa').value.trim();
    const kosAlat = bersihNombor(document.getElementById('mKosAlat').value);
    const kosUpah = bersihNombor(document.getElementById('mKosUpah').value);
-   const simptom = document.getElementById('mSimptom').value;
-   const bengkel = document.getElementById('mBengkel').value;
+   const simptom = document.getElementById('mSimptom').value.trim() || 'Servis Berkala';
+   const bengkel = document.getElementById('mBengkel').value.trim() || '-';
+   const alatInput = document.getElementById('mAlatGanti').value.trim();
 
    let odo = 0;
    if (rawOdo !== '') {
      odo = parseInt(rawOdo, 10) || 0;
    } else if (idSedangDieditServis) {
      const lama = datasetServis.find(d => String(d.id) === String(idSedangDieditServis));
-     odo = lama ? lama.odometer : 0;
+     odo = (lama && lama.odometer !== undefined) ? lama.odometer : 0;
    }
+
+   let alatFinal = alatInput;
+   if (idSedangDieditServis && !alatFinal) {
+     const lama = datasetServis.find(d => String(d.id) === String(idSedangDieditServis));
+     if (lama && lama.alat) alatFinal = lama.alat;
+   }
+   if (!alatFinal) alatFinal = simptom;
 
    const rekod = {
      id: idSedangDieditServis || Date.now(),
@@ -518,22 +840,25 @@
      kosAlat: kosAlat,
      kosUpah: kosUpah,
      jumlah: kosAlat + kosUpah,
+     kategori: document.getElementById('mKategori').value,
+     aktiviti: document.getElementById('mJenisAktiviti').value,
      simptom: simptom,
      bengkel: bengkel,
-     alat: '-'
+     alat: alatFinal
    };
 
    if (idSedangDieditServis) {
      const idx = datasetServis.findIndex(d => String(d.id) === String(idSedangDieditServis));
      if (idx !== -1) {
-       rekod.alat = datasetServis[idx].alat;
-       datasetServis[idx] = rekod;
+       datasetServis[idx] = { ...datasetServis[idx], ...rekod };
      } else {
        datasetServis.unshift(rekod);
      }
+     hantarKeAwan({ action: 'KEMASKINI_SERVIS', data: rekod });
      idSedangDieditServis = null;
    } else {
      datasetServis.unshift(rekod);
+     hantarKeAwan({ action: 'TAMBAH_SERVIS', data: rekod });
    }
 
    localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
@@ -544,14 +869,192 @@
  function tutupModalServis() {
    document.getElementById('modalServis').classList.add('hidden');
    document.getElementById('modalServis').classList.remove('flex');
+   document.getElementById('formServis').reset();
    idSedangDieditServis = null;
  }
 
- function initData() {
-   const stored = localStorage.getItem('penyelenggaraan_db_servis_v41');
-   if (stored) {
-     try { datasetServis = JSON.parse(stored); } catch(e) {}
+ function bukaModalMinyak() {
+   document.getElementById('modalMinyak').classList.remove('hidden');
+   document.getElementById('modalMinyak').classList.add('flex');
+   document.getElementById('mTarikhMinyak').value = new Date().toISOString().split('T')[0];
+ }
+
+ function tutupModalMinyak() {
+   document.getElementById('modalMinyak').classList.add('hidden');
+   document.getElementById('modalMinyak').classList.remove('flex');
+   document.getElementById('formMinyak').reset();
+   idSedangDieditMinyak = null;
+ }
+
+ function simpanTransaksiMinyak(e) {
+   e.preventDefault();
+   const plat = document.getElementById('mNoPlatMinyak').value;
+   const tarikh = document.getElementById('mTarikhMinyak').value;
+   const bayaran = bersihNombor(document.getElementById('mJumlahBayaran').value);
+   const liter = bersihNombor(document.getElementById('mLiter').value);
+   const odo = parseInt(document.getElementById('mOdometer').value, 10) || 0;
+   const stesen = document.getElementById('mStesen').value;
+   const jenis = document.getElementById('mJenisMinyak').value;
+   const catatan = document.getElementById('mCatatanMinyak').value.trim() || '-';
+
+   const rekod = {
+     id: idSedangDieditMinyak || Date.now(),
+     plat: plat,
+     tarikh: tarikh,
+     jumlah: bayaran,
+     liter: liter,
+     odometer: odo,
+     stesen: stesen,
+     jenis: jenis,
+     catatan: catatan
+   };
+
+   if (idSedangDieditMinyak) {
+     const idx = datasetMinyak.findIndex(d => String(d.id) === String(idSedangDieditMinyak));
+     if (idx !== -1) datasetMinyak[idx] = { ...datasetMinyak[idx], ...rekod };
+     else datasetMinyak.unshift(rekod);
+     hantarKeAwan({ action: 'KEMASKINI_MINYAK', data: rekod });
+     idSedangDieditMinyak = null;
+   } else {
+     datasetMinyak.unshift(rekod);
+     hantarKeAwan({ action: 'TAMBAH_MINYAK', data: rekod });
    }
+
+   localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+   tutupModalMinyak();
+   renderAll();
+ }
+
+ function bukaModalKeselamatan() {
+   const m = document.getElementById('modalKeselamatan');
+   if (m) {
+     m.classList.remove('hidden');
+     m.classList.add('flex');
+   }
+ }
+
+ function tutupModalKeselamatan() {
+   const m = document.getElementById('modalKeselamatan');
+   if (m) {
+     m.classList.add('hidden');
+     m.classList.remove('flex');
+   }
+ }
+
+ function eksportBackupJSON() {
+   const payload = { servis: datasetServis, minyak: datasetMinyak, kenderaan: datasetKenderaan };
+   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+   const a = document.createElement('a');
+   a.setAttribute("href", dataStr);
+   a.setAttribute("download", `Sandaran_Kenderaan_${new Date().toISOString().slice(0,10)}.json`);
+   document.body.appendChild(a);
+   a.click();
+   a.remove();
+   alert("✅ Fail sandaran keselamatan (.JSON) berjaya dimuat turun!");
+ }
+
+ function pulihkanDariFailJSON(event) {
+   const file = event.target.files[0];
+   if (!file) return;
+   const reader = new FileReader();
+   reader.onload = function(e) {
+     try {
+       const imported = JSON.parse(e.target.result);
+       if (imported.servis || Array.isArray(imported)) {
+         datasetServis = imported.servis || imported;
+         datasetMinyak = imported.minyak || [];
+         datasetKenderaan = imported.kenderaan || [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
+         localStorage.setItem('penyelenggaraan_db_servis_v41', JSON.stringify(datasetServis));
+         localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
+         localStorage.setItem('penyelenggaraan_db_kenderaan_v41', JSON.stringify(datasetKenderaan));
+         populatePlatFilter();
+         renderAll();
+         tutupModalKeselamatan();
+         alert("✅ Berjaya memulihkan pangkalan data daripada fail sandaran!");
+       }
+     } catch(err) {
+       alert("❌ Gagal membaca fail sandaran JSON.");
+     }
+   };
+   reader.readAsText(file);
+   event.target.value = '';
+ }
+
+ function tukarTab(tab) {
+   activeTab = tab;
+   if (tab === 'servis') {
+     document.getElementById('tabBtnServis').className = "tab-active pb-2 transition flex items-center gap-2 cursor-pointer";
+     document.getElementById('tabBtnMinyak').className = "text-slate-500 hover:text-slate-900 pb-2 transition flex items-center gap-2 cursor-pointer";
+     document.getElementById('tabContentServis').classList.remove('hidden');
+     document.getElementById('tabContentMinyak').classList.add('hidden');
+   } else {
+     document.getElementById('tabBtnMinyak').className = "tab-active pb-2 transition flex items-center gap-2 text-amber-800 border-amber-600 cursor-pointer";
+     document.getElementById('tabBtnServis').className = "text-slate-500 hover:text-slate-900 pb-2 transition flex items-center gap-2 cursor-pointer";
+     document.getElementById('tabContentMinyak').classList.remove('hidden');
+     document.getElementById('tabContentServis').classList.add('hidden');
+   }
+ }
+
+ function toggleSort(type) {
+   if (type === 'tarikh') currentSort = (currentSort === 'tarikh_desc') ? 'tarikh_asc' : 'tarikh_desc';
+   else if (type === 'kos') currentSort = (currentSort === 'kos_desc') ? 'kos_asc' : 'kos_desc';
+   else if (type === 'plat') currentSort = (currentSort === 'plat_asc') ? 'plat_desc' : 'plat_asc';
+   document.getElementById('sortBy').value = currentSort;
+   renderAll();
+ }
+
+ function tukarPenapisTempoh() {
+   const mode = document.getElementById('filterTempoh').value;
+   const dariEl = document.getElementById('filterTarikhDari');
+   const hinggaEl = document.getElementById('filterTarikhHingga');
+   const now = new Date();
+   const todayStr = now.toISOString().split('T')[0];
+
+   if (mode === 'SEMUA') {
+     dariEl.value = '';
+     hinggaEl.value = '';
+   } else if (mode === 'BULAN_INI') {
+     dariEl.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+     hinggaEl.value = todayStr;
+   }
+   renderAll();
+ }
+
+ function eksportExcel() {
+   let csv = "data:text/csv;charset=utf-8,Tarikh,No Plat,Odometer,Kos Alat,Kos Upah,Jumlah,Bengkel,Catatan\n";
+   datasetServis.forEach(r => {
+     csv += `"${formatTarikh(r.tarikh)}","${r.plat}",${r.odometer || 0},${(r.kosAlat || 0).toFixed(2)},${(r.kosUpah || 0).toFixed(2)},${(r.jumlah || 0).toFixed(2)},"${r.bengkel || ''}","${r.alat || ''}"\n`;
+   });
+   const link = document.createElement("a");
+   link.setAttribute("href", encodeURI(csv));
+   link.setAttribute("download", `Rekod_Penyelenggaraan_${new Date().toISOString().slice(0,10)}.csv`);
+   document.body.appendChild(link);
+   link.click();
+   link.remove();
+ }
+
+ function eksportLaporanEksekutif() {
+   window.print();
+ }
+
+ function initData() {
+   try {
+     const sServis = localStorage.getItem('penyelenggaraan_db_servis_v41');
+     if (sServis) datasetServis = JSON.parse(sServis);
+   } catch(e) {}
+
+   try {
+     const sMinyak = localStorage.getItem('penyelenggaraan_db_minyak_v41');
+     if (sMinyak) datasetMinyak = JSON.parse(sMinyak);
+   } catch(e) {}
+
+   try {
+     const sKenderaan = localStorage.getItem('penyelenggaraan_db_kenderaan_v41');
+     if (sKenderaan) datasetKenderaan = JSON.parse(sKenderaan);
+     else datasetKenderaan = [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
+   } catch(e) {}
+
+   populatePlatFilter();
    renderAll();
    segerakDariAwan();
  }
