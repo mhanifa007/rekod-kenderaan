@@ -378,7 +378,7 @@
  <th class="py-3 px-4 text-center bg-slate-800">Sasaran Servis Seterusnya</th>
  <th class="py-3 px-4">Kategori / Sistem</th>
  <th class="py-3 px-4">Kerosakan / Simptom</th>
- <th class="py-3 px-4">Alat Ganti Digunakan</th>
+ <th class="py-3 px-4">Keterangan Pembaikan / Penyelenggaraan</th>
  <th class="py-3 px-4 text-right">Kos Alat</th>
  <th class="py-3 px-4 text-right">Kos Upah</th>
  <th onclick="toggleSort('kos')" class="py-3 px-4 text-right sortable select-none">
@@ -3501,7 +3501,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  csv += `Penapis: ${selectedPlat}, Sehingga: ${tarikhHingga || 'Semua'}\n\n`;
 
  csv += "--- REKOD PENYELENGGARAAN ---\n";
- csv += "Tarikh,No Plat,Odometer Semasa (km),Sasaran Servis Seterusnya (km),Tarikh Seterusnya,Kategori / Sistem,Kerosakan / Simptom,Alat Ganti Digunakan,Part Total (RM),Labour Total (RM),SST (RM),Rounding (RM),Nett Total (RM),Bengkel / Catatan\n";
+ csv += "Tarikh,No Plat,Odometer Semasa (km),Sasaran Servis Seterusnya (km),Tarikh Seterusnya,Kategori / Sistem,Kerosakan / Simptom,Keterangan Pembaikan / Penyelenggaraan,Part Total (RM),Labour Total (RM),SST (RM),Rounding (RM),Nett Total (RM),Bengkel / Catatan\n";
  servis.forEach(r => {
  csv += `"${formatTarikh(r.tarikh)}","${r.plat}",${r.odometer || 0},${r.odoSeterusnya || 0},"${formatTarikh(r.tarikhSeterusnya) || '-'}","${r.kategori}","${r.simptom}","${r.alat}",${r.kosAlat.toFixed(2)},${r.kosUpah.toFixed(2)},${(r.sst || 0).toFixed(2)},${(r.rounding || 0).toFixed(2)},${r.jumlah.toFixed(2)},"${r.bengkel} - ${r.catatan}"\n`;
  });
