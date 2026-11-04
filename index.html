@@ -1568,7 +1568,7 @@ let currentSort = 'tarikh_desc';
  });
 
  function tutupSemuaModalSecaraSenyap() {
- ['modalServis', 'modalMinyak', 'modalKeselamatan', 'modalServisSeterusnya', 'modalPadam', 'modalPerincianServis', 'modalPWA'].forEach(id => {
+ ['modalServis', 'modalMinyak', 'modalKeselamatan', 'modalServisSeterusnya', 'modalPadam', 'modalPerincianServis', 'modalRingkasanKos', 'modalPWA'].forEach(id => {
  const el = document.getElementById(id);
  if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
  });
@@ -3114,7 +3114,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  <td class="py-3 px-4 text-center whitespace-nowrap bg-blue-50/40">${sasaranHtml}</td>
  <td class="py-3 px-4 text-xs font-semibold text-blue-600">${item.kategori}</td>
  <td class="py-3 px-4 max-w-xs truncate text-slate-700" title="${item.simptom}">${item.simptom}</td>
- <td class="py-3 px-4 max-w-xs font-medium text-slate-900 cursor-pointer group" onclick="bukaModalPerincianServis(${item.id})" title="Klik untuk lihat senarai penuh alat ganti">
+ <td class="py-3 px-4 max-w-xs font-medium text-slate-900 cursor-pointer group" onclick="bukaRingkasanKosServis(${item.id})" title="Klik untuk lihat ringkasan kos (alat ganti, upah, SST dan jumlah)">
    <div class="flex items-center justify-between gap-1">
      <span class="truncate group-hover:text-blue-600 transition underline decoration-dotted underline-offset-2">${item.alat}</span>
      <span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1 py-0.5 rounded shrink-0 opacity-80 group-hover:opacity-100">
@@ -3132,7 +3132,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  <td class="py-3 px-4 text-xs font-medium text-slate-800 whitespace-nowrap" title="${item.bengkel}">${item.noBil ? `<span class="bg-slate-100 text-slate-600 font-normal px-1.5 py-0.5 rounded text-[10px] mr-1.5 font-mono">#${item.noBil}</span>` : ''}<span class="font-semibold text-slate-900">${item.bengkel || 'Bengkel Bebas'}</span></td>
  <td class="py-3 px-4 text-center whitespace-nowrap no-print">
  <div class="flex items-center justify-center gap-1.5">
- <button onclick="bukaModalPerincianServis(${item.id})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg border border-indigo-200 transition cursor-pointer" title="Lihat Perincian Penuh Item & Invois">
+ <button onclick="bukaModalPerincianServis(${item.id})" class="text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 p-1.5 rounded-lg border border-indigo-200 transition cursor-pointer" title="Perincian pembaikan dan kos setiap item">
  <i class="fa-solid fa-eye"></i>
  </button>
  <button onclick="editRekodServis(${item.id})" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-lg border border-blue-200 transition cursor-pointer" title="Edit / Kemaskini Rekod Servis">
@@ -3677,6 +3677,72 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  }
 
  
+ // Pecahkan teks alat ganti kepada item (koma dalam kurungan tidak memecahkan item)
+ function pecahItemAlat(teks) {
+   const hasil = []; let dalam = 0, semasa = '';
+   for (const ch of String(teks)) {
+     if (ch === '(' || ch === '[') dalam++;
+     else if (ch === ')' || ch === ']') dalam = Math.max(0, dalam - 1);
+     if (ch === ',' && dalam === 0) { hasil.push(semasa); semasa = ''; } else semasa += ch;
+   }
+   hasil.push(semasa);
+   return hasil.map(t => t.trim()).filter(Boolean).map(t => {
+     const m = t.match(/^(.*?)\s*\((\d+(?:\.\d+)?)x(?:\s*RM\s*(\d+(?:\.\d+)?))?\)\s*$/i);
+     if (m) {
+       const qty = parseFloat(m[2]);
+       const harga = m[3] !== undefined ? parseFloat(m[3]) : null;
+       return { nama: m[1] || t, qty: qty, harga: harga, jumlah: harga !== null ? qty * harga : null };
+     }
+     return { nama: t, qty: null, harga: null, jumlah: null };
+   });
+ }
+
+ // Mata pertama: ringkasan kos sahaja
+ function bukaRingkasanKosServis(id) {
+   const item = datasetServis.find(d => d.id === id);
+   if (!item) return;
+   const kosAlat = item.kosAlat || 0, kosUpah = item.kosUpah || 0, sst = item.sst || 0;
+   const subjumlah = kosAlat + kosUpah;
+   const pelarasan = (item.jumlah || 0) - (subjumlah + sst);
+   const petaSkop = { UPAH_SAHAJA: 'atas upah', ALAT_SAHAJA: 'atas alat ganti', SEMUA: 'atas upah + alat ganti' };
+   document.getElementById('ringPlat').innerText = item.plat || '-';
+   document.getElementById('ringTarikh').innerText = formatTarikh(item.tarikh);
+   document.getElementById('ringBengkel').innerText = item.bengkel || 'Bengkel Bebas';
+   document.getElementById('ringKosAlat').innerText = formatRM(kosAlat);
+   document.getElementById('ringKosUpah').innerText = formatRM(kosUpah);
+   document.getElementById('ringSubjumlah').innerText = formatRM(subjumlah);
+   const rowSST = document.getElementById('ringRowSST');
+   if (sst > 0) {
+     rowSST.classList.remove('hidden'); rowSST.classList.add('flex');
+     document.getElementById('ringLabelSST').innerText = `SST ${item.kadarSst ? item.kadarSst + '% ' : ''}(${petaSkop[item.skopSst] || 'atas upah'})`;
+     document.getElementById('ringSST').innerText = formatRM(sst);
+   } else {
+     rowSST.classList.add('hidden'); rowSST.classList.remove('flex');
+   }
+   const rowRound = document.getElementById('ringRowRounding');
+   if (Math.abs(pelarasan) >= 0.005) {
+     rowRound.classList.remove('hidden'); rowRound.classList.add('flex');
+     document.getElementById('ringRounding').innerText = (pelarasan > 0 ? '+' : '-') + formatRM(Math.abs(pelarasan));
+   } else {
+     rowRound.classList.add('hidden'); rowRound.classList.remove('flex');
+   }
+   document.getElementById('ringJumlah').innerText = formatRM(item.jumlah || 0);
+   document.getElementById('btnRingLihatPerincian').onclick = function() {
+     // Tutup senyap (tanpa undur sejarah) supaya modal perincian tidak turut tertutup
+     const r = document.getElementById('modalRingkasanKos');
+     r.classList.add('hidden'); r.classList.remove('flex'); openModalId = null;
+     bukaModalPerincianServis(id);
+   };
+   const m = document.getElementById('modalRingkasanKos');
+   m.classList.remove('hidden'); m.classList.add('flex');
+   tolakSejarahModal('modalRingkasanKos');
+ }
+
+ function tutupRingkasanKosServis() {
+   const m = document.getElementById('modalRingkasanKos');
+   if (m) { m.classList.add('hidden'); m.classList.remove('flex'); undurSejarahModal(); }
+ }
+
  function bukaModalPerincianServis(id) {
    const item = datasetServis.find(d => d.id === id);
    if (!item) return;
@@ -3690,23 +3756,46 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
    document.getElementById('detBengkel').innerText = item.bengkel || 'Bengkel Bebas';
    document.getElementById('detSimptom').innerHTML = `<strong class="text-blue-900">[${item.kategori || 'Servis'}]</strong> ${item.simptom || 'Penyelenggaraan Am'}`;
 
-   // Senarai alat ganti yang dipecahkan
+   // Senarai pembaikan / alat ganti beserta kos setiap item
    const containerAlat = document.getElementById('detSenaraiAlat');
    containerAlat.innerHTML = '';
-   
-   if (item.alat && item.alat.trim() !== '') {
-     const pecahan = item.alat.split(',').map(s => s.trim()).filter(Boolean);
-     pecahan.forEach(al => {
+   const senaraiItem = item.alat && item.alat.trim() !== '' ? pecahItemAlat(item.alat) : [];
+   if (senaraiItem.length > 0) {
+     let jumlahBerharga = 0, adaHarga = false;
+     senaraiItem.forEach(it => {
+       if (it.jumlah !== null) { jumlahBerharga += it.jumlah; adaHarga = true; }
        const div = document.createElement('div');
-       div.className = "flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 text-xs";
+       div.className = "flex items-start justify-between gap-3 bg-slate-50 p-2 rounded-lg border border-slate-100 text-xs";
+       const butiranKuantiti = (it.qty !== null && it.harga !== null) ? `<div class="text-[10px] text-slate-500 font-mono">${it.qty} x ${formatRM(it.harga)}</div>` : (it.qty !== null ? `<div class="text-[10px] text-slate-500 font-mono">${it.qty} unit</div>` : '');
        div.innerHTML = `
-         <i class="fa-solid fa-check text-emerald-600 mt-0.5 text-[10px]"></i>
-         <span class="font-medium text-slate-800">${al}</span>
+         <div class="flex items-start gap-2 min-w-0">
+           <i class="fa-solid fa-check text-emerald-600 mt-0.5 text-[10px] shrink-0"></i>
+           <div class="min-w-0"><span class="font-medium text-slate-800 break-words">${it.nama}</span>${butiranKuantiti}</div>
+         </div>
+         <span class="font-mono font-bold ${it.jumlah !== null ? 'text-emerald-700' : 'text-slate-400'} shrink-0">${it.jumlah !== null ? formatRM(it.jumlah) : '-'}</span>
        `;
        containerAlat.appendChild(div);
      });
+     const bakiAlat = (item.kosAlat || 0) - jumlahBerharga;
+     if (adaHarga && bakiAlat > 0.005) {
+       const div = document.createElement('div');
+       div.className = "flex items-center justify-between gap-3 bg-amber-50 p-2 rounded-lg border border-amber-200 text-xs";
+       div.innerHTML = `<span class="font-medium text-amber-900">Lain-lain / kos tidak dipecahkan</span><span class="font-mono font-bold text-amber-800">${formatRM(bakiAlat)}</span>`;
+       containerAlat.appendChild(div);
+     } else if (!adaHarga && (item.kosAlat || 0) > 0) {
+       const div = document.createElement('div');
+       div.className = "text-[11px] text-slate-500 italic px-1";
+       div.innerText = `Harga setiap item tidak direkodkan. Jumlah alat ganti: ${formatRM(item.kosAlat)}.`;
+       containerAlat.appendChild(div);
+     }
    } else {
      containerAlat.innerHTML = '<span class="text-slate-400 italic">Tiada pecahan alat ganti direkodkan.</span>';
+   }
+   if ((item.kosUpah || 0) > 0) {
+     const divUpah = document.createElement('div');
+     divUpah.className = "flex items-center justify-between gap-3 bg-blue-50 p-2 rounded-lg border border-blue-200 text-xs";
+     divUpah.innerHTML = `<span class="font-medium text-blue-900"><i class="fa-solid fa-screwdriver-wrench text-blue-600 text-[10px] mr-1.5"></i>Upah / kerja</span><span class="font-mono font-bold text-amber-700">${formatRM(item.kosUpah)}</span>`;
+     containerAlat.appendChild(divUpah);
    }
 
    document.getElementById('detKosAlat').innerText = formatRM(item.kosAlat || 0);
@@ -3889,6 +3978,39 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
 
 
  <!-- MODAL PERINCIAN RESIT / ITEM SERVIS (VIEW FULL DETAILS) -->
+ <div id="modalRingkasanKos" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-150">
+     <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+       <div class="flex items-center gap-2">
+         <span class="bg-emerald-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow"><i class="fa-solid fa-receipt"></i></span>
+         <h3 class="font-bold text-sm sm:text-base">Ringkasan Kos Servis</h3>
+       </div>
+       <button type="button" onclick="tutupRingkasanKosServis()" class="text-slate-400 hover:text-white transition text-lg p-1 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+     </div>
+     <div class="p-5 space-y-3 text-xs">
+       <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+         <div>
+           <span id="ringPlat" class="bg-slate-900 text-white font-bold font-mono px-2 py-0.5 rounded text-xs"></span>
+           <div id="ringBengkel" class="text-[11px] text-slate-500 mt-1"></div>
+         </div>
+         <span id="ringTarikh" class="font-bold text-slate-800 font-mono"></span>
+       </div>
+       <div class="space-y-2">
+         <div class="flex justify-between text-slate-600"><span>Jumlah Alat Ganti</span><strong id="ringKosAlat" class="font-mono text-emerald-700"></strong></div>
+         <div class="flex justify-between text-slate-600"><span>Jumlah Upah</span><strong id="ringKosUpah" class="font-mono text-amber-700"></strong></div>
+         <div class="flex justify-between text-slate-700 pt-1 border-t border-slate-100"><span class="font-semibold">Subjumlah</span><strong id="ringSubjumlah" class="font-mono text-slate-900"></strong></div>
+         <div id="ringRowSST" class="hidden justify-between text-slate-600"><span id="ringLabelSST">SST</span><strong id="ringSST" class="font-mono text-amber-800"></strong></div>
+         <div id="ringRowRounding" class="hidden justify-between text-slate-600"><span>Pelarasan sen</span><strong id="ringRounding" class="font-mono text-slate-700"></strong></div>
+         <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-sm"><span class="font-extrabold text-slate-900">Jumlah Bersih</span><strong id="ringJumlah" class="font-extrabold text-blue-800 font-mono text-base"></strong></div>
+       </div>
+       <div class="pt-2 flex justify-between items-center gap-2">
+         <button type="button" id="btnRingLihatPerincian" class="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer"><i class="fa-solid fa-list-check"></i> Perincian pembaikan</button>
+         <button type="button" onclick="tutupRingkasanKosServis()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition cursor-pointer">Tutup</button>
+       </div>
+     </div>
+   </div>
+ </div>
+
  <div id="modalPerincianServis" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
      <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
@@ -3896,7 +4018,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
          <span class="bg-blue-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-xs shadow">
            <i class="fa-solid fa-file-invoice"></i>
          </span>
-         <h3 class="font-bold text-sm sm:text-base">Perincian Rekod Servis & Alat Ganti</h3>
+         <h3 class="font-bold text-sm sm:text-base">Perincian Pembaikan & Kos</h3>
        </div>
        <button type="button" onclick="tutupModalPerincianServis()" class="text-slate-400 hover:text-white transition text-lg p-1 cursor-pointer">
          <i class="fa-solid fa-xmark"></i>
@@ -3945,9 +4067,9 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
        <div class="border border-slate-200 rounded-xl p-3.5 space-y-2 bg-white">
          <span class="text-[11px] text-slate-900 font-bold flex items-center gap-1.5 border-b border-slate-100 pb-2">
            <i class="fa-solid fa-list-check text-emerald-600"></i>
-           Senarai Penuh Item Dibaiki & Alat Ganti:
+           Senarai Pembaikan / Alat Ganti & Kos:
          </span>
-         <div id="detSenaraiAlat" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+         <div id="detSenaraiAlat" class="space-y-1.5">
            <!-- Diisi oleh JS -->
          </div>
        </div>
