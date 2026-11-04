@@ -679,7 +679,7 @@
  <div class="flex justify-between items-center pt-1 border-t border-blue-100">
  <div class="flex items-center gap-2">
  <input type="checkbox" id="chkKenakanSST" checked onchange="kiraJumlahKeseluruhanServis()" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer">
- <label for="chkKenakanSST" class="cursor-pointer select-none font-semibold text-slate-700">Add SST (atas Upah sahaja):</label>
+ <label for="chkKenakanSST" class="cursor-pointer select-none font-semibold text-slate-700">Kenakan SST:</label>
  <div class="flex items-center gap-1">
  <input type="number" id="mKadarSST" value="8" min="0" max="100" step="0.5" oninput="kiraJumlahKeseluruhanServis()" class="w-14 text-center px-1 py-0.5 border border-slate-300 rounded text-xs font-bold bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500" title="Kadar peratusan SST (lalai 8%)">
  <span class="font-bold text-slate-600">%</span>
@@ -687,6 +687,16 @@
  </div>
  <span id="lblNilaiSST" class="font-bold text-amber-700 font-mono">RM 0.00</span>
  </div>
+
+ <div id="barisSkopSST" class="flex flex-wrap justify-between items-center gap-2 text-slate-600">
+ <label for="mSkopSST" class="font-semibold text-slate-700">SST dikenakan atas:</label>
+ <select id="mSkopSST" onchange="kiraJumlahKeseluruhanServis()" class="text-xs px-2 py-1 border border-slate-300 rounded-lg bg-white font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+ <option value="UPAH_SAHAJA">Kos Upah sahaja</option>
+ <option value="ALAT_SAHAJA">Kos Alat Ganti sahaja</option>
+ <option value="SEMUA">Upah + Alat Ganti</option>
+ </select>
+ </div>
+ <div id="lblAsasSST" class="text-[10px] text-slate-500 text-right -mt-1"></div>
 
  <div class="flex justify-between items-center text-slate-600">
  <span>Grand Total:</span>
@@ -1401,6 +1411,7 @@
              kosUpah: valKosUpah,
              kadarSst: bersihNombor(ambilNilaiKemas(d, ['kadarsst', 'sst %'])),
              sst: bersihNombor(ambilNilaiKemas(d, ['sst'])),
+             skopSst: (['UPAH_SAHAJA','ALAT_SAHAJA','SEMUA'].includes(d.skopSst) ? d.skopSst : (bersihNombor(d.sst) > 0 ? 'UPAH_SAHAJA' : '-')),
              rounding: bersihNombor(ambilNilaiKemas(d, ['rounding', 'pelarasan'])),
              grandTotal: bersihNombor(ambilNilaiKemas(d, ['grandtotal'])) || valJumlah,
              jumlah: valJumlah,
@@ -2150,6 +2161,30 @@ binaSenaraiChecklist(kat);
  kiraJumlahKeseluruhanServis();
  }
 
+ // Pengiraan SST & pembundaran dikongsi oleh paparan pratonton dan simpanan supaya sentiasa sama.
+ function kiraAnggaranServis(kosAlat, kosUpah, adaSST, kadarSST, skopSST) {
+   let asasSst = kosUpah;
+   if (skopSST === 'ALAT_SAHAJA') asasSst = kosAlat;
+   else if (skopSST === 'SEMUA') asasSst = kosUpah + kosAlat;
+   const nilaiSST = adaSST ? Math.round(asasSst * (kadarSST / 100) * 100) / 100 : 0;
+   const grandTotal = kosAlat + kosUpah + nilaiSST;
+   let nettTotal = grandTotal;
+   if (tetapanGlobal.kaedahRounding === '5_SEN') nettTotal = Math.round(grandTotal * 20) / 20;
+   else if (tetapanGlobal.kaedahRounding === '1_SEN') nettTotal = Math.round(grandTotal * 100) / 100;
+   return { asasSst, nilaiSST, grandTotal, nettTotal, rounding: nettTotal - grandTotal };
+ }
+
+ // Tetapkan SST borang kepada nilai lalai Tetapan Polisi (boleh diubah bagi setiap transaksi)
+ function setLalaiSstBorang() {
+   const chk = document.getElementById('chkKenakanSST');
+   const kadar = document.getElementById('mKadarSST');
+   const skop = document.getElementById('mSkopSST');
+   if (chk) chk.checked = true;
+   if (kadar) kadar.value = (tetapanGlobal.kadarSst !== undefined ? tetapanGlobal.kadarSst : 8);
+   if (skop) skop.value = tetapanGlobal.skopSst || 'UPAH_SAHAJA';
+   kiraJumlahKeseluruhanServis();
+ }
+
  // Kira jumlah keseluruhan (Kos Alat Ganti + Kos Upah)
  function kiraJumlahKeseluruhanServis() {
  const kosAlat = parseFloat(document.getElementById('mKosAlat')?.value) || 0;
@@ -2158,24 +2193,15 @@ binaSenaraiChecklist(kat);
 
  const chkSST = document.getElementById('chkKenakanSST');
  const adaSST = chkSST ? chkSST.checked : true;
- const kadarSST = parseFloat(document.getElementById('mKadarSST')?.value) || tetapanGlobal.kadarSst || 8;
- 
- // Fleksibiliti Skop SST mengikut Tetapan Polisi
- let asasSst = kosUpah;
- if (tetapanGlobal.skopSst === 'ALAT_SAHAJA') asasSst = kosAlat;
- else if (tetapanGlobal.skopSst === 'SEMUA') asasSst = kosUpah + kosAlat;
-
- const nilaiSST = adaSST ? (asasSst * (kadarSST / 100)) : 0;
- const grandTotal = subjumlah + nilaiSST;
- 
- // Fleksibiliti Kaedah Pembundaran Tunai
- let nettTotal = grandTotal;
- if (tetapanGlobal.kaedahRounding === '5_SEN') {
- nettTotal = Math.round(grandTotal * 20) / 20;
- } else if (tetapanGlobal.kaedahRounding === '1_SEN') {
- nettTotal = Math.round(grandTotal * 100) / 100;
- }
- const rounding = nettTotal - grandTotal;
+ const inKadar = parseFloat(document.getElementById('mKadarSST')?.value);
+ const kadarSST = isNaN(inKadar) ? 0 : inKadar;
+ const skopSST = document.getElementById('mSkopSST')?.value || tetapanGlobal.skopSst || 'UPAH_SAHAJA';
+ const { asasSst, nilaiSST, grandTotal, nettTotal, rounding } = kiraAnggaranServis(kosAlat, kosUpah, adaSST, kadarSST, skopSST);
+ const elKadar = document.getElementById('mKadarSST'); const elSkop = document.getElementById('mSkopSST');
+ if (elKadar) elKadar.disabled = !adaSST;
+ if (elSkop) elSkop.disabled = !adaSST;
+ const lblAsas = document.getElementById('lblAsasSST');
+ if (lblAsas) lblAsas.innerText = adaSST ? `Asas SST: ${formatRM(asasSst)} x ${kadarSST}%` : 'Bengkel tidak mengenakan SST';
 
  const lblPart = document.getElementById('lblPartTotal');
  if (lblPart) lblPart.innerText = formatRM(kosAlat);
@@ -2271,6 +2297,7 @@ binaSenaraiChecklist(kat);
 
  function bukaModalServis(prefillPlat, prefillKategori) {
  populatePlatFilter();
+ setLalaiSstBorang();
  document.getElementById('modalServis').classList.remove('hidden');
  document.getElementById('modalServis').classList.add('flex');
  
@@ -2413,14 +2440,12 @@ const tarikhInput = document.getElementById('mTarikhServis');
 
  const chkSST = document.getElementById('chkKenakanSST');
  const adaSST = chkSST ? chkSST.checked : true;
- const kadarSST = parseFloat(document.getElementById('mKadarSST')?.value) || 0;
+ const inKadarSimpan = parseFloat(document.getElementById('mKadarSST')?.value);
+ const kadarSST = isNaN(inKadarSimpan) ? 0 : inKadarSimpan;
+ const skopSST = document.getElementById('mSkopSST')?.value || 'UPAH_SAHAJA';
  const subjumlah = kosAlat + kosUpah;
- 
- // SST HANYA DIKENAKAN PADA KOS UPAH
- const nilaiSST = adaSST ? (kosUpah * (kadarSST / 100)) : 0;
- const grandTotal = subjumlah + nilaiSST;
- const nettTotal = Math.round(grandTotal * 20) / 20;
- const rounding = nettTotal - grandTotal;
+ // SST ikut pilihan bagi transaksi ini (kadar, skop, atau tidak dikenakan), sama dengan pratonton
+ const { nilaiSST, grandTotal, nettTotal, rounding } = kiraAnggaranServis(kosAlat, kosUpah, adaSST, kadarSST, skopSST);
 
  const bengkelVal = document.getElementById('mBengkel').value.trim() || 'Bengkel Bebas';
  const noBilVal = document.getElementById('mNoBil') ? document.getElementById('mNoBil').value.trim() : '';
@@ -2448,6 +2473,7 @@ const tarikhInput = document.getElementById('mTarikhServis');
  kosAlat: kosAlat,
  kosUpah: kosUpah,
  kadarSst: adaSST ? kadarSST : 0,
+ skopSst: adaSST ? skopSST : '-',
  sst: nilaiSST,
  rounding: rounding,
  grandTotal: grandTotal,
@@ -2484,6 +2510,7 @@ const tarikhInput = document.getElementById('mTarikhServis');
  kosAlat: kosAlat,
  kosUpah: kosUpah,
  kadarSst: adaSST ? kadarSST : 0,
+ skopSst: adaSST ? skopSST : '-',
  sst: nilaiSST,
  rounding: rounding,
  grandTotal: grandTotal,
@@ -2693,7 +2720,12 @@ if (semuaPlat.length === 0) {
  }
  const mKadar = document.getElementById('mKadarSST');
  if (mKadar) {
- mKadar.value = item.kadarSst !== undefined ? item.kadarSst : 8;
+ mKadar.value = (item.kadarSst && item.kadarSst > 0) ? item.kadarSst : (tetapanGlobal.kadarSst || 8);
+ }
+ const mSkop = document.getElementById('mSkopSST');
+ if (mSkop) {
+ // Rekod lama tidak menyimpan skop: ia dikira atas upah sahaja
+ mSkop.value = (item.skopSst && item.skopSst !== '-') ? item.skopSst : 'UPAH_SAHAJA';
  }
 
  kiraJumlahKeseluruhanServis();
@@ -3468,7 +3500,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  csv += `Penapis: ${selectedPlat}, Sehingga: ${tarikhHingga || 'Semua'}\n\n`;
 
  csv += "--- REKOD PENYELENGGARAAN ---\n";
- csv += "Tarikh,No Plat,Odometer Semasa (km),Sasaran Servis Seterusnya (km),Tarikh Seterusnya,Kategori / Sistem,Kerosakan / Simptom,Alat Ganti Digunakan,Part Total (RM),Labour Total (RM),SST 8% (RM),Rounding (RM),Nett Total (RM),Bengkel / Catatan\n";
+ csv += "Tarikh,No Plat,Odometer Semasa (km),Sasaran Servis Seterusnya (km),Tarikh Seterusnya,Kategori / Sistem,Kerosakan / Simptom,Alat Ganti Digunakan,Part Total (RM),Labour Total (RM),SST (RM),Rounding (RM),Nett Total (RM),Bengkel / Catatan\n";
  servis.forEach(r => {
  csv += `"${formatTarikh(r.tarikh)}","${r.plat}",${r.odometer || 0},${r.odoSeterusnya || 0},"${formatTarikh(r.tarikhSeterusnya) || '-'}","${r.kategori}","${r.simptom}","${r.alat}",${r.kosAlat.toFixed(2)},${r.kosUpah.toFixed(2)},${(r.sst || 0).toFixed(2)},${(r.rounding || 0).toFixed(2)},${r.jumlah.toFixed(2)},"${r.bengkel} - ${r.catatan}"\n`;
  });
@@ -3683,6 +3715,9 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
    if (item.sst && item.sst > 0) {
      rowSST.classList.remove('hidden');
      document.getElementById('detSST').innerText = formatRM(item.sst);
+    const petaSkop = { UPAH_SAHAJA: 'atas upah', ALAT_SAHAJA: 'atas alat ganti', SEMUA: 'atas upah + alat ganti' };
+    const lblDet = document.getElementById('detLabelSST');
+    if (lblDet) lblDet.innerText = `SST ${item.kadarSst ? item.kadarSst + '% ' : ''}(${petaSkop[item.skopSst] || 'atas upah'}):`;
    } else {
      rowSST.classList.add('hidden');
    }
@@ -3927,7 +3962,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
            <strong id="detKosUpah" class="font-mono text-amber-700"></strong>
          </div>
          <div id="detRowSST" class="flex justify-between text-slate-600">
-           <span>SST (atas upah):</span>
+           <span id="detLabelSST">SST (atas upah):</span>
            <strong id="detSST" class="font-mono text-amber-800"></strong>
          </div>
          <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-sm">
