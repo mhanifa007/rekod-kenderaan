@@ -3126,6 +3126,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  <td class="py-3 px-4 text-right text-amber-600 font-semibold font-mono">${formatRM(item.kosUpah)}</td>
  <td class="py-3 px-4 text-right">
  <div class="font-extrabold text-slate-900 font-mono">${formatRM(item.jumlah)}</div>
+ ${!(item.jumlah > 0) ? `<div class="mt-0.5"><span class="inline-block text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 px-1.5 py-0.5 rounded" title="Kos servis ini RM 0.00, jadi tidak termasuk dalam kiraan kos sebenar. Edit rekod untuk mengisinya.">Kos belum diisi</span></div>` : ''}
  ${item.sst && item.sst > 0 ? `<div class="text-[10px] text-amber-700 font-medium font-mono">(SST: ${formatRM(item.sst)})</div>` : ''}
  </td>
  <td class="py-3 px-4 text-xs font-medium text-slate-800 whitespace-nowrap" title="${item.bengkel}">${item.noBil ? `<span class="bg-slate-100 text-slate-600 font-normal px-1.5 py-0.5 rounded text-[10px] mr-1.5 font-mono">#${item.noBil}</span>` : ''}<span class="font-semibold text-slate-900">${item.bengkel || 'Bengkel Bebas'}</span></td>
