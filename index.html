@@ -1240,6 +1240,29 @@
    return 'RM ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
  }
 
+ // Tambah bulan pada tarikh YYYY-MM-DD tanpa kesan zon masa. Hari akhir bulan dikekalkan
+ // (contoh 31 Okt + 6 bulan = 30 Apr, bukan 1 Mei).
+ function tambahBulanTarikh(str, bulan) {
+   const m = String(str || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+   if (!m) return '';
+   let tahun = parseInt(m[1], 10), bln = parseInt(m[2], 10) - 1 + (parseInt(bulan, 10) || 0), hari = parseInt(m[3], 10);
+   tahun += Math.floor(bln / 12);
+   bln = ((bln % 12) + 12) % 12;
+   const akhirBulan = new Date(Date.UTC(tahun, bln + 1, 0)).getUTCDate();
+   hari = Math.min(hari, akhirBulan);
+   return `${tahun}-${String(bln + 1).padStart(2, '0')}-${String(hari).padStart(2, '0')}`;
+ }
+
+ // Tarikh sasaran servis seterusnya bagi satu rekod. Dikira semula daripada tarikh servis + selang bulan,
+ // supaya rekod lama yang tersimpan dengan tarikh tersasar turut dipaparkan dengan betul.
+ function tarikhSasaranRekod(item) {
+   if (item && item.tarikh && parseInt(item.selangBulan, 10) > 0) {
+     const t = tambahBulanTarikh(item.tarikh, item.selangBulan);
+     if (t) return t;
+   }
+   return item ? item.tarikhSeterusnya : '';
+ }
+
  function formatTarikh(strTarikh) {
  if (!strTarikh || strTarikh === '-' || strTarikh === 'Belum direkodkan') return strTarikh || '-';
  if (typeof strTarikh === 'string' && /^\d{2}\/\d{2}\/\d{4}$/.test(strTarikh)) return strTarikh;
@@ -1667,11 +1690,9 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
 ? servisTerakhir.odoSeterusnya 
 : (servisTerakhir && servisTerakhir.odometer ? servisTerakhir.odometer + defaultKm : defaultKm);
 
- let sasaranTarikh = servisTerakhir && servisTerakhir.tarikhSeterusnya ? servisTerakhir.tarikhSeterusnya : '-';
+ let sasaranTarikh = servisTerakhir && tarikhSasaranRekod(servisTerakhir) ? tarikhSasaranRekod(servisTerakhir) : '-';
  if (sasaranTarikh === '-' && servisTerakhir && servisTerakhir.tarikh) {
- const d = new Date(servisTerakhir.tarikh);
- d.setMonth(d.getMonth() + defaultBulan);
- sasaranTarikh = d.toISOString().split('T')[0];
+ sasaranTarikh = tambahBulanTarikh(servisTerakhir.tarikh, defaultBulan);
  }
 
  // Bina senarai item kecil & cadangan peralatan
@@ -1680,9 +1701,7 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  let itSasaranOdo = servisTerakhir && servisTerakhir.odometer ? (servisTerakhir.odometer + it.selangKm).toLocaleString() + ' km' : it.selangKm.toLocaleString() + ' km';
  let itSasaranTarikh = '-';
  if (servisTerakhir && servisTerakhir.tarikh) {
- const dt = new Date(servisTerakhir.tarikh);
- dt.setMonth(dt.getMonth() + it.selangBulan);
- itSasaranTarikh = dt.toISOString().split('T')[0];
+ itSasaranTarikh = tambahBulanTarikh(servisTerakhir.tarikh, it.selangBulan);
  }
 
  itemKecilHtml += `
@@ -2244,12 +2263,7 @@ binaSenaraiChecklist(kat);
  return;
  }
 
- const d = new Date(tarikhServis);
- d.setMonth(d.getMonth() + selangBulan);
- const yyyy = d.getFullYear();
- const mm = String(d.getMonth() + 1).padStart(2, '0');
- const dd = String(d.getDate()).padStart(2, '0');
- const tarikhSasaranStr = `${yyyy}-${mm}-${dd}`;
+ const tarikhSasaranStr = tambahBulanTarikh(tarikhServis, selangBulan);
 
  if (odoSemasa === 0) {
    previewEl.innerHTML = `<span class="text-indigo-700 font-extrabold">${formatTarikh(tarikhSasaranStr)}</span> <span class="text-[10px] text-slate-400 font-normal">(Ikut tarikh sahaja - 00000)</span>`;
@@ -2397,9 +2411,7 @@ const tarikhInput = document.getElementById('mTarikhServis');
  const selangKm = parseInt(document.getElementById('mSelangKm').value) || 10000;
  const selangBulan = parseInt(document.getElementById('mSelangBulan').value) || 6;
  const odoSasaran = odoSemasa > 0 ? (odoSemasa + selangKm) : 0;
- const d = new Date(tarikhServis);
- d.setMonth(d.getMonth() + selangBulan);
- const tarikhSasaranStr = d.toISOString().split('T')[0];
+ const tarikhSasaranStr = tambahBulanTarikh(tarikhServis, selangBulan);
 
  const kosAlat = parseFloat(document.getElementById('mKosAlat').value) || 0;
  const kosUpah = parseFloat(document.getElementById('mKosUpah').value) || 0;
@@ -3083,7 +3095,7 @@ if (servisData.length === 0) {
  const terkini = sortedByDate[0];
 
  if (terkini.odoSeterusnya && terkini.tarikhSeterusnya) {
- reminderText.innerHTML = `Kenderaan <strong>${terkini.plat}</strong>: Servis seterusnya bagi kategori <strong>${terkini.kategori}</strong> dijadualkan pada <strong class="text-white underline">${terkini.odoSeterusnya.toLocaleString()} km</strong> atau sebelum <strong class="text-white underline">${formatTarikh(terkini.tarikhSeterusnya)}</strong>.`;
+ reminderText.innerHTML = `Kenderaan <strong>${terkini.plat}</strong>: Servis seterusnya bagi kategori <strong>${terkini.kategori}</strong> dijadualkan pada <strong class="text-white underline">${terkini.odoSeterusnya.toLocaleString()} km</strong> atau sebelum <strong class="text-white underline">${formatTarikh(tarikhSasaranRekod(terkini))}</strong>.`;
  reminderBadge.innerText = "Jadual";
  } else {
  reminderText.innerHTML = `Servis terakhir bagi kenderaan <strong>${terkini.plat}</strong> dijalankan pada <strong>${formatTarikh(terkini.tarikh)}</strong> (${terkini.simptom}).`;
@@ -3104,7 +3116,7 @@ if (servisData.length === 0) {
  tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
  
 const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
- ? `<div class="text-xs font-semibold text-blue-900">${item.odoSeterusnya.toLocaleString()} km</div><div class="text-[11px] text-slate-500">${formatTarikh(item.tarikhSeterusnya)}</div>`
+ ? `<div class="text-xs font-semibold text-blue-900">${item.odoSeterusnya.toLocaleString()} km</div><div class="text-[11px] text-slate-500">${formatTarikh(tarikhSasaranRekod(item))}</div>`
  : `<span class="text-slate-400 text-xs">-</span>`;
 
  tr.innerHTML = `
@@ -3503,7 +3515,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  csv += "--- REKOD PENYELENGGARAAN ---\n";
  csv += "Tarikh,No Plat,Odometer Semasa (km),Sasaran Servis Seterusnya (km),Tarikh Seterusnya,Kategori / Sistem,Kerosakan / Simptom,Keterangan Pembaikan / Penyelenggaraan,Part Total (RM),Labour Total (RM),SST (RM),Rounding (RM),Nett Total (RM),Bengkel / Catatan\n";
  servis.forEach(r => {
- csv += `"${formatTarikh(r.tarikh)}","${r.plat}",${r.odometer || 0},${r.odoSeterusnya || 0},"${formatTarikh(r.tarikhSeterusnya) || '-'}","${r.kategori}","${r.simptom}","${r.alat}",${r.kosAlat.toFixed(2)},${r.kosUpah.toFixed(2)},${(r.sst || 0).toFixed(2)},${(r.rounding || 0).toFixed(2)},${r.jumlah.toFixed(2)},"${r.bengkel} - ${r.catatan}"\n`;
+ csv += `"${formatTarikh(r.tarikh)}","${r.plat}",${r.odometer || 0},${r.odoSeterusnya || 0},"${formatTarikh(tarikhSasaranRekod(r)) || '-'}","${r.kategori}","${r.simptom}","${r.alat}",${r.kosAlat.toFixed(2)},${r.kosUpah.toFixed(2)},${(r.sst || 0).toFixed(2)},${(r.rounding || 0).toFixed(2)},${r.jumlah.toFixed(2)},"${r.bengkel} - ${r.catatan}"\n`;
  });
 
  csv += "\n--- REKOD MINYAK ---\n";
