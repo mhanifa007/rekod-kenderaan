@@ -344,7 +344,7 @@
            <th class="py-2.5 px-3 text-right">Belanja Minyak</th>
            <th class="py-2.5 px-3 text-right">Belanja Servis</th>
            <th class="py-2.5 px-3 text-right">Kos Keseluruhan</th>
-           <th class="py-2.5 px-3 text-right text-indigo-300 font-bold">Purata CPK</th>
+           <th class="py-2.5 px-3 text-right text-indigo-300 font-bold">Kos Per km</th>
            <th class="py-2.5 px-3 text-center text-emerald-300 font-bold">Purata km/L</th>
          </tr>
        </thead>
@@ -3477,6 +3477,20 @@ if (semuaPlat.length === 0) {
    });
    return { jarak, liter, kos, segmen };
  }
+ // Kos per km bagi SATU kenderaan: minyak dan penyelenggaraan dikira berasingan.
+ // Minyak  = kos isian dalam segmen penuh-ke-penuh / jarak segmen.
+ // Servis  = jumlah servis dalam tempoh / jarak odometer sebenar (tertinggi - terendah merentas servis+minyak).
+ const JARAK_MIN_SERVIS = 1000;
+ function kiraKosPerKmPlat(servisArr, minyakArr) {
+   const kec = kiraKecekapanPlat(minyakArr);
+   const odo = [...servisArr, ...minyakArr].map(d => d.odometer).filter(v => v && v > 0);
+   const span = odo.length > 1 ? Math.max(...odo) - Math.min(...odo) : 0;
+   const kosServis = servisArr.reduce((a, c) => a + (c.jumlah || 0), 0);
+   const minyakKm = kec.jarak > 0 ? kec.kos / kec.jarak : null;
+   const servisKm = span >= JARAK_MIN_SERVIS ? kosServis / span : (kosServis === 0 && span > 0 ? 0 : null);
+   const jumlahKm = (minyakKm !== null && servisKm !== null) ? minyakKm + servisKm : null;
+   return { kec, span, minyakKm, servisKm, jumlahKm };
+ }
  function kiraKecekapanSemua(rekod) {
    const plats = [...new Set(rekod.map(d => d.plat))];
    const hasil = { jarak: 0, liter: 0, kos: 0, segmen: {} };
@@ -3587,9 +3601,10 @@ if (semuaPlat.length === 0) {
  const literDikesan = kecSemua.liter;
  const purataKmLiter = literDikesan > 0 ? (jarakDikesan / literDikesan).toFixed(2) : '-';
  const purataL100 = jarakDikesan > 0 ? ((literDikesan / jarakDikesan) * 100).toFixed(2) : '-';
- // Kos per km: kos servis dalam tempoh + kos minyak bagi segmen yang dikira, dibahagi jarak segmen
- const kosCpk = totalServis + kecSemua.kos;
- const cpk = jarakDikesan > 0 ? (kosCpk / jarakDikesan).toFixed(2) : '0.00';
+  const platDalamData = [...new Set([...filteredServis, ...filteredMinyak].map(d => d.plat))];
+ const banyakKenderaan = selectedPlat === 'ALL' && platDalamData.length > 1;
+ const kpk = banyakKenderaan ? null : kiraKosPerKmPlat(filteredServis, filteredMinyak);
+ const fmtKm = v => v === null ? '-' : v.toFixed(2);
 
  const elKmL = document.getElementById('kpiKecekapanMinyak');
  if (elKmL) {
@@ -3614,9 +3629,22 @@ if (semuaPlat.length === 0) {
  const elL100 = document.getElementById('kpiL100km');
  if (elL100) elL100.innerText = purataL100 !== '-' ? `${purataL100} L/100km (${jarakDikesan.toLocaleString()} km)` : 'Perlu min 2 isian';
  const elCpk = document.getElementById('kpiKosPerKm');
- if (elCpk) elCpk.innerText = `RM ${cpk}/km`;
  const elNisbah = document.getElementById('kpiPecahanNisbah');
- if (elNisbah) elNisbah.innerText = `Minyak: ${pctMinyak}% | Servis: ${pctServis}%`;
+ if (elCpk && elNisbah) {
+   if (banyakKenderaan) {
+     elCpk.innerText = 'Pilih kenderaan';
+     elNisbah.innerText = 'Kos/km hanya bermakna bagi satu kenderaan. Lihat jadual Kos Per Kenderaan.';
+   } else if (kpk.jumlahKm !== null) {
+     elCpk.innerText = `RM ${kpk.jumlahKm.toFixed(2)}/km`;
+     elNisbah.innerText = `Minyak RM ${fmtKm(kpk.minyakKm)} + Servis RM ${fmtKm(kpk.servisKm)} /km`;
+   } else if (kpk.minyakKm !== null) {
+     elCpk.innerText = `RM ${kpk.minyakKm.toFixed(2)}/km`;
+     elNisbah.innerText = 'Minyak sahaja (jarak belum cukup untuk servis)';
+   } else {
+     elCpk.innerText = '- /km';
+     elNisbah.innerText = 'Data belum mencukupi (perlu min 2 isian penuh)';
+   }
+ }
 
  document.getElementById('badgeCountServis').innerText = filteredServis.length;
  document.getElementById('badgeCountMinyak').innerText = filteredMinyak.length;
@@ -4002,7 +4030,9 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
      const literMinyak = kec.liter;
 
      const purataKmL = (literMinyak > 0 && jarakMinyak > 0) ? (jarakMinyak / literMinyak).toFixed(2) : '-';
-     const cpkVal = (jarakMinyak > 0) ? ((kosServis + kec.kos) / jarakMinyak).toFixed(2) : '-';
+     const kpkP = kiraKosPerKmPlat(sServis, sMinyak);
+     const cpkVal = kpkP.jumlahKm !== null ? kpkP.jumlahKm.toFixed(2) : (kpkP.minyakKm !== null ? kpkP.minyakKm.toFixed(2) : '-');
+     const cpkNota = kpkP.jumlahKm !== null ? `Minyak ${kpkP.minyakKm.toFixed(2)} + Servis ${kpkP.servisKm.toFixed(2)}` : (kpkP.minyakKm !== null ? 'minyak sahaja' : '');
 
      let badgeKmL = `<span class="text-slate-400">-</span>`;
      if (purataKmL !== '-') {
@@ -4021,7 +4051,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
        <td class="py-2.5 px-3 text-right text-amber-700 font-semibold">${formatRM(kosMinyak)}</td>
        <td class="py-2.5 px-3 text-right text-blue-700 font-semibold">${formatRM(kosServis)}</td>
        <td class="py-2.5 px-3 text-right font-bold text-slate-900">${formatRM(kosTotal)}</td>
-       <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-700">${cpkVal !== '-' ? 'RM ' + cpkVal + '/km' : '<span class="text-slate-400 font-normal">-</span>'}</td>
+       <td class="py-2.5 px-3 text-right font-mono font-bold text-indigo-700">${cpkVal !== '-' ? 'RM ' + cpkVal + '/km' + (cpkNota ? `<div class="text-[10px] font-normal text-slate-500">${cpkNota}</div>` : '') : '<span class="text-slate-400 font-normal">-</span>'}</td>
        <td class="py-2.5 px-3 text-center whitespace-nowrap">${badgeKmL}</td>
      `;
      tbody.appendChild(tr);
@@ -4118,14 +4148,15 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
    const kS = sv.reduce((a, c) => a + (c.jumlah || 0), 0), kA = sv.reduce((a, c) => a + (c.kosAlat || 0), 0), kU = sv.reduce((a, c) => a + (c.kosUpah || 0), 0);
    const kM = mn.reduce((a, c) => a + (c.jumlah || 0), 0), lit = mn.reduce((a, c) => a + (c.liter || 0), 0);
    const kec = kiraKecekapanPlat(mn);
+   const kk = kiraKosPerKmPlat(sv, mn);
    jS += kS; jM += kM; jL += lit; jAlat += kA; jUpah += kU; jJarak += kec.jarak; jLiterKec += kec.liter; jKosKec += kec.kos;
    ringkasan += `<tr><td><b>${E(pl)}</b></td><td class="r">${sv.length}</td><td class="r">${n2(kA)}</td><td class="r">${n2(kU)}</td><td class="r"><b>${n2(kS)}</b></td>
      <td class="r">${mn.length}</td><td class="r">${n2(lit)}</td><td class="r"><b>${n2(kM)}</b></td><td class="r"><b>${n2(kS + kM)}</b></td>
-     <td class="r">${kec.jarak > 0 ? kec.jarak.toLocaleString() : '-'}</td><td class="r">${kec.liter > 0 ? n2(kec.jarak / kec.liter) : '-'}</td><td class="r">${kec.jarak > 0 ? n2((kS + kec.kos) / kec.jarak) : '-'}</td></tr>`;
+     <td class="r">${kec.jarak > 0 ? kec.jarak.toLocaleString() : '-'}</td><td class="r">${kec.liter > 0 ? n2(kec.jarak / kec.liter) : '-'}</td><td class="r">${kk.minyakKm !== null ? n2(kk.minyakKm) : '-'}</td><td class="r">${kk.servisKm !== null ? n2(kk.servisKm) : '-'}</td><td class="r"><b>${kk.jumlahKm !== null ? n2(kk.jumlahKm) : '-'}</b></td></tr>`;
  });
  ringkasan += `<tr class="jum"><td>JUMLAH</td><td class="r">${servis.length}</td><td class="r">${n2(jAlat)}</td><td class="r">${n2(jUpah)}</td><td class="r">${n2(jS)}</td>
    <td class="r">${minyak.length}</td><td class="r">${n2(jL)}</td><td class="r">${n2(jM)}</td><td class="r">${n2(jS + jM)}</td>
-   <td class="r">${jJarak > 0 ? jJarak.toLocaleString() : '-'}</td><td class="r">${jLiterKec > 0 ? n2(jJarak / jLiterKec) : '-'}</td><td class="r">${jJarak > 0 ? n2((jS + jKosKec) / jJarak) : '-'}</td></tr>`;
+   <td class="r">${jJarak > 0 ? jJarak.toLocaleString() : '-'}</td><td class="r">${jLiterKec > 0 ? n2(jJarak / jLiterKec) : '-'}</td><td class="r">-</td><td class="r">-</td><td class="r">-</td></tr>`;
 
  // Butiran penyelenggaraan setiap kenderaan
  let butiranServis = '';
@@ -4158,9 +4189,9 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
    <h1>LAPORAN BELANJA KENDERAAN</h1>
    <div class="meta">Kenderaan: <b>${selectedPlat === 'ALL' ? 'Semua Kenderaan' : E(selectedPlat)}</b> &nbsp;|&nbsp; Tempoh: <b>${E(tempoh)}</b> &nbsp;|&nbsp; Tarikh cetak: ${E(tarikhCetak)}</div>
    <h2>A. Ringkasan Belanja Mengikut Kenderaan (RM)</h2>
-   ${plats.length ? `<table><tr><th rowspan="2">No Plat</th><th colspan="4">Penyelenggaraan</th><th colspan="3">Minyak</th><th rowspan="2" class="r">Jumlah Belanja</th><th colspan="3">Kecekapan</th></tr>
-   <tr><th class="r">Bil</th><th class="r">Alat</th><th class="r">Upah</th><th class="r">Jumlah</th><th class="r">Bil isian</th><th class="r">Liter</th><th class="r">Jumlah</th><th class="r">Jarak (km)</th><th class="r">km/L</th><th class="r">RM/km</th></tr>${ringkasan}</table>` : '<p>Tiada rekod dalam tempoh ini.</p>'}
-   <div class="nota">km/L dikira isian penuh ke penuh bagi setiap kenderaan. RM/km = kos servis dalam tempoh + kos minyak bagi jarak yang dikira, dibahagi jarak itu. Saman tidak dimasukkan dalam jumlah belanja.</div>
+   ${plats.length ? `<table><tr><th rowspan="2">No Plat</th><th colspan="4">Penyelenggaraan</th><th colspan="3">Minyak</th><th rowspan="2" class="r">Jumlah Belanja</th><th colspan="5">Kecekapan &amp; Kos Per km (RM)</th></tr>
+   <tr><th class="r">Bil</th><th class="r">Alat</th><th class="r">Upah</th><th class="r">Jumlah</th><th class="r">Bil isian</th><th class="r">Liter</th><th class="r">Jumlah</th><th class="r">Jarak (km)</th><th class="r">km/L</th><th class="r">Minyak /km</th><th class="r">Servis /km</th><th class="r">Jumlah /km</th></tr>${ringkasan}</table>` : '<p>Tiada rekod dalam tempoh ini.</p>'}
+   <div class="nota">km/L dikira isian penuh ke penuh bagi setiap kenderaan. Minyak /km = kos isian bagi jarak yang dikira. Servis /km = jumlah servis dibahagi jarak odometer sebenar dalam tempoh (perlu sekurang-kurangnya 1,000 km, jika tidak dipaparkan '-'). Kos per km tidak dikira bagi jumlah keseluruhan kerana hanya bermakna bagi satu kenderaan. Saman tidak dimasukkan dalam jumlah belanja.</div>
    <h2 class="pecah">B. Butiran Penyelenggaraan Mengikut Kenderaan</h2>${butiranServis || '<p>Tiada rekod.</p>'}
    <h2 class="pecah">C. Butiran Belanja Minyak Mengikut Kenderaan</h2>${butiranMinyak || '<p>Tiada rekod.</p>'}
    <h2 class="pecah">D. Saman (dilaporkan berasingan)</h2>
