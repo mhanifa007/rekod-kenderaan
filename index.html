@@ -122,7 +122,7 @@
  </div>
 
  <!-- 2 Butang Tambah Transaksi (Servis & Minyak) -->
- <div class="flex items-center gap-2">
+ <div class="flex flex-wrap items-center gap-2">
  <!-- Butang Rekod Minyak -->
  <button onclick="bukaModalMinyak()" class="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5" title="Tambah Rekod Isian Minyak">
  <i class="fa-solid fa-gas-pump text-sm"></i>
@@ -133,6 +133,12 @@
  <button onclick="bukaModalServis()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5" title="Tambah Rekod Servis / Pembaikan">
  <i class="fa-solid fa-plus-circle text-sm"></i>
  <span>+ Servis</span>
+ </button>
+
+ <!-- Butang Rekod Saman -->
+ <button onclick="bukaModalSaman()" class="bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-bold text-xs px-3 py-2 rounded-lg shadow-md transition flex items-center gap-1.5" title="Tambah Rekod Saman">
+ <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
+ <span>+ Saman</span>
  </button>
  </div>
 
@@ -337,7 +343,7 @@
  <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-slate-50/50">
  
 <!-- Tab Switcher (Tajuk Asal Sahaja) -->
- <div class="flex items-center gap-6 text-sm font-semibold border-b border-transparent">
+ <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-semibold border-b border-transparent">
  <button onclick="tukarTab('servis')" id="tabBtnServis" class="tab-active pb-2 transition flex items-center gap-2 cursor-pointer">
  <i class="fa-solid fa-screwdriver-wrench text-blue-600"></i>
  <span>Log Penyelenggaraan</span>
@@ -348,6 +354,12 @@
  <i class="fa-solid fa-gas-pump text-amber-600"></i>
  <span>Log Belanja Minyak</span>
  <span id="badgeCountMinyak" class="bg-amber-100 text-amber-800 text-[11px] px-2 py-0.5 rounded-full font-bold">0</span>
+ </button>
+
+ <button onclick="tukarTab('saman')" id="tabBtnSaman" class="text-slate-500 hover:text-slate-900 pb-2 transition flex items-center gap-2 cursor-pointer">
+ <i class="fa-solid fa-file-invoice-dollar text-rose-600"></i>
+ <span>Log Saman</span>
+ <span id="badgeCountSaman" class="bg-rose-100 text-rose-800 text-[11px] px-2 py-0.5 rounded-full font-bold">0</span>
  </button>
  </div>
 
@@ -445,6 +457,51 @@
 
  <div id="noDataMinyakText" class="hidden text-center py-10 text-slate-400 text-sm">
  Tiada rekod belanja minyak ditemui. Sila klik "+ Kos Minyak" untuk menambah rekod isian.
+ </div>
+ </div>
+
+ <!-- KANDUNGAN TAB 3: LOG SAMAN -->
+ <div id="tabContentSaman" class="hidden">
+ <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 border-b border-slate-100 bg-rose-50/30">
+ <div class="bg-white border border-slate-200 rounded-lg px-3 py-2">
+ <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Jumlah Saman</div>
+ <div id="samanJumlahSemua" class="text-lg font-extrabold text-slate-900 font-mono">RM 0.00</div>
+ <div id="samanBilSemua" class="text-[11px] text-slate-500">0 rekod</div>
+ </div>
+ <div class="bg-white border border-rose-200 rounded-lg px-3 py-2">
+ <div class="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Belum Dibayar</div>
+ <div id="samanJumlahBelum" class="text-lg font-extrabold text-rose-700 font-mono">RM 0.00</div>
+ <div id="samanBilBelum" class="text-[11px] text-slate-500">0 rekod</div>
+ </div>
+ <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2">
+ <div class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Telah Dibayar</div>
+ <div id="samanJumlahBayar" class="text-lg font-extrabold text-emerald-700 font-mono">RM 0.00</div>
+ <div id="samanBilBayar" class="text-[11px] text-slate-500">0 rekod</div>
+ </div>
+ </div>
+ <div class="overflow-x-auto">
+ <table class="w-full text-left border-collapse text-sm">
+ <thead>
+ <tr class="bg-slate-900 text-slate-200 text-xs uppercase tracking-wider">
+ <th class="py-3 px-4">Tarikh</th>
+ <th class="py-3 px-4">No. Plat</th>
+ <th class="py-3 px-4">Kesalahan</th>
+ <th class="py-3 px-4">Lokasi</th>
+ <th class="py-3 px-4">No. Saman</th>
+ <th class="py-3 px-4">Pemandu</th>
+ <th class="py-3 px-4 text-right">Amaun (RM)</th>
+ <th class="py-3 px-4">Status</th>
+ <th class="py-3 px-4">Catatan</th>
+ <th class="py-3 px-4 text-center no-print">Tindakan</th>
+ </tr>
+ </thead>
+ <tbody id="tableSamanBody" class="divide-y divide-slate-100 text-slate-700">
+ <!-- Rows injected by JavaScript -->
+ </tbody>
+ </table>
+ </div>
+ <div id="noDataSamanText" class="hidden text-center py-10 text-slate-400 text-sm">
+ Tiada rekod saman ditemui. Sila klik "+ Saman" untuk menambah rekod.
  </div>
  </div>
 
@@ -808,6 +865,126 @@
  </div>
  </div>
 
+ <!-- POP-UP MODAL: REKOD SAMAN -->
+ <div id="modalSaman" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+ <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+
+ <div class="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+ <button type="button" onclick="tutupModalSaman()" class="flex items-center gap-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition" title="Kembali ke Dashboard">
+ <i class="fa-solid fa-arrow-left"></i>
+ <span>Kembali</span>
+ </button>
+ <div class="flex items-center gap-2">
+ <span class="bg-rose-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+ <i class="fa-solid fa-file-invoice-dollar"></i>
+ </span>
+ <h3 id="tajukModalSaman" class="font-bold text-sm sm:text-base">Rekod Saman</h3>
+ </div>
+ <button type="button" onclick="tutupModalSaman()" class="text-slate-400 hover:text-white transition text-lg p-1" title="Tutup">
+ <i class="fa-solid fa-xmark"></i>
+ </button>
+ </div>
+
+ <form id="formSaman" onsubmit="simpanTransaksiSaman(event)" class="overflow-y-auto p-6 space-y-4">
+
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Tarikh Kesalahan</label>
+ <input type="date" id="mTarikhSaman" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none">
+ </div>
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">No. Plat Kenderaan</label>
+ <div class="flex gap-2">
+ <select id="mNoPlatSaman" onchange="semakPlatBaharuSaman(this)" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none font-bold text-slate-900 bg-white">
+ <!-- Diisi secara automatik -->
+ </select>
+ <button type="button" onclick="promptDaftarPlatBaharu('saman')" class="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-900 text-xs font-bold rounded-lg whitespace-nowrap transition cursor-pointer border border-rose-200" title="Daftar Kenderaan Baharu">
+ <i class="fa-solid fa-plus text-[10px]"></i> Plat
+ </button>
+ </div>
+ </div>
+ </div>
+
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Pihak Penguat Kuasa</label>
+ <select id="mPihakSaman" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none">
+ <option value="JPJ">JPJ</option>
+ <option value="PDRM">PDRM (Polis)</option>
+ <option value="PBT">PBT (Majlis Perbandaran / Bandaran)</option>
+ <option value="Lain-lain">Lain-lain</option>
+ </select>
+ </div>
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Kesalahan</label>
+ <select id="mKesalahanSaman" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none">
+ <option value="Melebihi had laju">Melebihi had laju</option>
+ <option value="Melanggar lampu isyarat merah">Melanggar lampu isyarat merah</option>
+ <option value="Meletak kenderaan di tempat larangan">Meletak kenderaan di tempat larangan</option>
+ <option value="Tiada / tamat cukai jalan">Tiada / tamat cukai jalan</option>
+ <option value="Tiada / tamat lesen atau insurans">Tiada / tamat lesen atau insurans</option>
+ <option value="Tidak memakai tali pinggang / topi keledar">Tidak memakai tali pinggang / topi keledar</option>
+ <option value="Menggunakan telefon semasa memandu">Menggunakan telefon semasa memandu</option>
+ <option value="Lain-lain">Lain-lain</option>
+ </select>
+ </div>
+ </div>
+
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Lokasi Kesalahan (Pilihan)</label>
+ <input type="text" id="mLokasiSaman" placeholder="cth: Lebuhraya LDP, KM 12" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none">
+ </div>
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">No. Saman / Notis (Pilihan)</label>
+ <input type="text" id="mNoSaman" placeholder="cth: 0123456789" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none font-mono">
+ </div>
+ </div>
+
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Pemandu (Pilihan)</label>
+ <input type="text" id="mPemanduSaman" placeholder="cth: nama pemandu semasa kesalahan" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none">
+ </div>
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Amaun Saman (RM)</label>
+ <input type="number" step="0.01" min="0.01" id="mJumlahSaman" placeholder="cth: 150.00" required class="w-full text-sm px-3 py-2 border border-rose-300 bg-rose-50/30 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none font-bold text-slate-900">
+ </div>
+ </div>
+
+ <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Status Bayaran</label>
+ <select id="mStatusSaman" onchange="tukarStatusSamanBorang()" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none font-semibold text-slate-800">
+ <option value="Belum Dibayar">Belum Dibayar</option>
+ <option value="Dibayar">Telah Dibayar</option>
+ </select>
+ </div>
+ <div id="boxTarikhBayarSaman" class="hidden">
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Tarikh Bayaran</label>
+ <input type="date" id="mTarikhBayarSaman" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+ </div>
+ </div>
+
+ <div>
+ <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan (Pilihan)</label>
+ <input type="text" id="mCatatanSaman" placeholder="cth: Bayar diskaun di kaunter JPJ" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none">
+ </div>
+
+ <div class="pt-3 border-t border-slate-200 flex gap-3">
+ <button type="button" onclick="tutupModalSaman()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-sm transition">
+ Batal
+ </button>
+ <button type="submit" class="w-2/3 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-sm shadow transition flex items-center justify-center gap-2">
+ <i class="fa-solid fa-check"></i>
+ <span id="btnTeksSimpanSaman">Simpan Saman</span>
+ </button>
+ </div>
+
+ </form>
+ </div>
+ </div>
+
  <!-- POP-UP MODAL 2: KEMASUKAN BELANJA MINYAK (FUEL INPUT) -->
  <div id="modalMinyak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
@@ -1055,11 +1232,22 @@
        </button>
      </div>
 
+     <!-- Pilihan B2: Kosongkan Saman Sahaja -->
+     <div class="p-2.5 bg-rose-50/30 border border-rose-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+       <div>
+         <span class="font-bold text-rose-900 block text-xs">Kosongkan Log Saman Sahaja</span>
+         <span class="text-[10px] text-slate-500">Rekod servis dan minyak kekal selamat dan tidak dipadam.</span>
+       </div>
+       <button onclick="sahkanTindakanKritikal('KOSONGKAN_SAMAN')" class="text-[11px] bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
+         Padam Saman Sahaja
+       </button>
+     </div>
+
      <!-- Pilihan C: Kosongkan Semua (Reset Penuh) -->
      <div class="p-2.5 bg-rose-50/50 border border-rose-200 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-2">
        <div>
-         <span class="font-bold text-rose-900 block text-xs">Kosongkan Semua Rekod (Servis & Minyak)</span>
-         <span class="text-[10px] text-slate-500">Memadam kedua-dua rekod untuk memulakan catatan dari sifar.</span>
+         <span class="font-bold text-rose-900 block text-xs">Kosongkan Semua Rekod (Servis, Minyak & Saman)</span>
+         <span class="text-[10px] text-slate-500">Memadam semua rekod untuk memulakan catatan dari sifar.</span>
        </div>
        <button onclick="sahkanTindakanKritikal('KOSONGKAN')" class="text-[11px] bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer">
          Kosongkan Semua
@@ -1277,6 +1465,7 @@
 
  let datasetServis = [];
  let datasetMinyak = [];
+ let datasetSaman = [];
  let datasetKenderaan = [];
  let activeTab = 'servis';
  let tetapanGlobal = {
@@ -1387,6 +1576,39 @@
      const data = await res.json();
      if (data && data.status === 'success') {
        let adaPerubahan = false;
+       // Saman: hanya disegerak jika Code.gs baharu memulangkan senarai saman. Dengan Code.gs lama, data saman tempatan dibiarkan.
+       if (Array.isArray(data.saman)) {
+         let samanPernah = false;
+         try { samanPernah = localStorage.getItem(KUNCI_BENDERA_SAMAN) === '1'; } catch(e) {}
+         if (data.saman.length > 0) {
+           datasetSaman = data.saman.map((d, index) => ({
+             id: bersihNombor(d.id) || (Date.now() + 900 + index),
+             tarikh: String(d.tarikh || '').split('T')[0],
+             plat: String(d.plat || '').trim().toUpperCase(),
+             pihak: String(d.pihak || 'JPJ'),
+             kesalahan: String(d.kesalahan || 'Lain-lain'),
+             lokasi: String(d.lokasi || ''),
+             noSaman: String(d.noSaman === undefined || d.noSaman === null ? '' : d.noSaman),
+             pemandu: String(d.pemandu || ''),
+             jumlah: bersihNombor(d.jumlah),
+             status: (d.status === 'Dibayar' ? 'Dibayar' : 'Belum Dibayar'),
+             tarikhBayar: String(d.tarikhBayar || '').split('T')[0],
+             catatan: String(d.catatan || '')
+           }));
+           try { localStorage.setItem(KUNCI_BENDERA_SAMAN, '1'); } catch(e) {}
+           simpanKeStorageSaman();
+           adaPerubahan = true;
+         } else if (!samanPernah && datasetSaman.length > 0) {
+           // Kali pertama selepas Code.gs baharu: naikkan saman tempatan ke Sheet
+           try { localStorage.setItem(KUNCI_BENDERA_SAMAN, '1'); } catch(e) {}
+           hantarKeAwan({ action: 'IMPORT_SAMAN', data: datasetSaman });
+         } else if (samanPernah && datasetSaman.length > 0) {
+           // Sheet dikosongkan di tempat lain: cerminkan
+           datasetSaman = [];
+           simpanKeStorageSaman();
+           adaPerubahan = true;
+         }
+       }
        const awanKosong = (!Array.isArray(data.servis) || data.servis.length === 0) && (!Array.isArray(data.minyak) || data.minyak.length === 0);
        let pernahSegerak = false;
        try { pernahSegerak = localStorage.getItem(KUNCI_BENDERA_AWAN) === '1'; } catch(e) {}
@@ -1484,6 +1706,7 @@
  // ---- Baris gilir penghantaran ke awan (disimpan di peranti, dicuba semula jika gagal) ----
  const KUNCI_BARIS_AWAN = 'penyelenggaraan_awan_barisgilir_v41';
  const KUNCI_BENDERA_AWAN = 'penyelenggaraan_awan_pernah_segerak_v41';
+ const KUNCI_BENDERA_SAMAN = 'penyelenggaraan_awan_saman_segerak_v41';
  let sedangHantarAwan = false;
  let timerUlangAwan = null;
 
@@ -1553,8 +1776,10 @@
  function gantiAwanDenganTempatan() {
    hantarKeAwan({ action: 'KOSONGKAN_SERVIS' });
    hantarKeAwan({ action: 'KOSONGKAN_MINYAK' });
+   hantarKeAwan({ action: 'KOSONGKAN_SAMAN' });
    if (datasetServis.length > 0) hantarKeAwan({ action: 'IMPORT_SERVIS', data: datasetServis });
    if (datasetMinyak.length > 0) hantarKeAwan({ action: 'IMPORT_MINYAK', data: datasetMinyak });
+   if (datasetSaman.length > 0) hantarKeAwan({ action: 'IMPORT_SAMAN', data: datasetSaman });
  }
 
  window.addEventListener('online', function() { prosesBarisAwan(); segerakDariAwan(); });
@@ -1591,7 +1816,7 @@ let currentSort = 'tarikh_desc';
  });
 
  function tutupSemuaModalSecaraSenyap() {
- ['modalServis', 'modalMinyak', 'modalKeselamatan', 'modalServisSeterusnya', 'modalPadam', 'modalPerincianServis', 'modalRingkasanKos', 'modalPWA'].forEach(id => {
+ ['modalServis', 'modalMinyak', 'modalKeselamatan', 'modalServisSeterusnya', 'modalPadam', 'modalPerincianServis', 'modalRingkasanKos', 'modalSaman', 'modalPWA'].forEach(id => {
  const el = document.getElementById(id);
  if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
  });
@@ -1822,6 +2047,12 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  simpanKeStorageMinyak();
 
  try {
+   const storedSaman = localStorage.getItem('penyelenggaraan_db_saman_v41');
+   datasetSaman = storedSaman ? JSON.parse(storedSaman) : [];
+   if (!Array.isArray(datasetSaman)) datasetSaman = [];
+ } catch(e) { datasetSaman = []; }
+
+ try {
    const storedKenderaan = localStorage.getItem('penyelenggaraan_db_kenderaan_v41');
    if (storedKenderaan) {
      datasetKenderaan = JSON.parse(storedKenderaan);
@@ -1857,6 +2088,10 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  localStorage.setItem('penyelenggaraan_db_minyak_v41', JSON.stringify(datasetMinyak));
  }
 
+ function simpanKeStorageSaman() {
+ try { localStorage.setItem('penyelenggaraan_db_saman_v41', JSON.stringify(datasetSaman)); } catch(e) {}
+ }
+
  function simpanKeStorageKenderaan() {
  localStorage.setItem('penyelenggaraan_db_kenderaan_v41', JSON.stringify(datasetKenderaan));
  }
@@ -1866,6 +2101,7 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  tarikhSimpan: new Date().toLocaleString('ms-MY'),
  servis: datasetServis,
  minyak: datasetMinyak,
+ saman: datasetSaman,
  kenderaan: datasetKenderaan
  };
  localStorage.setItem('penyelenggaraan_autobackup_v41', JSON.stringify(backupPayload));
@@ -1879,7 +2115,7 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  if (backupRaw) {
  try {
  const parsed = JSON.parse(backupRaw);
- el.innerText = `Salinan terakhir: ${parsed.tarikhSimpan} (${parsed.servis.length} servis, ${parsed.minyak.length} minyak).`;
+ el.innerText = `Salinan terakhir: ${parsed.tarikhSimpan} (${parsed.servis.length} servis, ${parsed.minyak.length} minyak, ${(parsed.saman || []).length} saman).`;
  } catch(e) {
  el.innerText = 'Salinan sandaran tersedia.';
  }
@@ -1889,28 +2125,26 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  // Tab Switcher (Tajuk Asal: Log Penyelenggaraan vs Log Belanja Minyak)
  function tukarTab(tab) {
  activeTab = tab;
- const btnServis = document.getElementById('tabBtnServis');
- const btnMinyak = document.getElementById('tabBtnMinyak');
- const contentServis = document.getElementById('tabContentServis');
- const contentMinyak = document.getElementById('tabContentMinyak');
-
- if (tab === 'servis') {
- btnServis.className = "tab-active pb-2 transition flex items-center gap-2 cursor-pointer";
- btnMinyak.className = "text-slate-500 hover:text-slate-900 pb-2 transition flex items-center gap-2 cursor-pointer";
- contentServis.classList.remove('hidden');
- contentMinyak.classList.add('hidden');
- } else {
- btnMinyak.className = "tab-active pb-2 transition flex items-center gap-2 text-amber-800 border-amber-600 cursor-pointer";
- btnServis.className = "text-slate-500 hover:text-slate-900 pb-2 transition flex items-center gap-2 cursor-pointer";
- contentMinyak.classList.remove('hidden');
- contentServis.classList.add('hidden');
- }
+ const cfg = {
+   servis: { btn: 'tabBtnServis', isi: 'tabContentServis', aktif: "tab-active pb-2 transition flex items-center gap-2 cursor-pointer" },
+   minyak: { btn: 'tabBtnMinyak', isi: 'tabContentMinyak', aktif: "tab-active pb-2 transition flex items-center gap-2 text-amber-800 border-amber-600 cursor-pointer" },
+   saman:  { btn: 'tabBtnSaman',  isi: 'tabContentSaman',  aktif: "tab-active pb-2 transition flex items-center gap-2 text-rose-800 border-rose-600 cursor-pointer" }
+ };
+ const tidakAktif = "text-slate-500 hover:text-slate-900 pb-2 transition flex items-center gap-2 cursor-pointer";
+ Object.keys(cfg).forEach(k => {
+   const btn = document.getElementById(cfg[k].btn);
+   const isi = document.getElementById(cfg[k].isi);
+   if (!btn || !isi) return;
+   if (k === tab) { btn.className = cfg[k].aktif; isi.classList.remove('hidden'); }
+   else { btn.className = tidakAktif; isi.classList.add('hidden'); }
+ });
  }
 
  function dapatkanSemuaPlat() {
  const platServis = datasetServis.map(d => d.plat);
  const platMinyak = datasetMinyak.map(d => d.plat);
- return [...new Set([...datasetKenderaan, ...platServis, ...platMinyak])].filter(Boolean).sort();
+ const platSaman = datasetSaman.map(d => d.plat);
+ return [...new Set([...datasetKenderaan, ...platServis, ...platMinyak, ...platSaman])].filter(Boolean).sort();
  }
 
  function daftarPlatBaharu(platInput) {
@@ -1931,6 +2165,9 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  if (targetModal === 'minyak') {
  const sel = document.getElementById('mNoPlatMinyak');
  if (sel) sel.value = platDidaftar;
+ } else if (targetModal === 'saman') {
+ const sel = document.getElementById('mNoPlatSaman');
+ if (sel) sel.value = platDidaftar;
  } else if (targetModal === 'servis') {
  const sel = document.getElementById('mNoPlatServis');
  if (sel) {
@@ -1945,11 +2182,13 @@ const allPlats = [...new Set(datasetServis.map(d => d.plat))];
  const selectFilter = document.getElementById('filterPlat');
  const selectServis = document.getElementById('mNoPlatServis');
  const selectMinyak = document.getElementById('mNoPlatMinyak');
+ const selectSaman = document.getElementById('mNoPlatSaman');
  const selectMatriks = document.getElementById('modalServisSeterusnyaPlatSelect');
 
  const currentValFilter = selectFilter ? selectFilter.value : 'ALL';
  const currentValServis = selectServis ? selectServis.value : '';
  const currentValMinyak = selectMinyak ? selectMinyak.value : '';
+ const currentValSaman = selectSaman ? selectSaman.value : '';
 
  const unikPlat = dapatkanSemuaPlat();
 
@@ -2006,6 +2245,7 @@ const optPlaceholder = document.createElement('option');
 
  // 3. Dropdown Borang Minyak
  binaOpsyenModal(selectMinyak, currentValMinyak, 'amber');
+ binaOpsyenModal(selectSaman, currentValSaman, 'rose');
 
  // 4. Dropdown Servis Seterusnya Modal
  if (selectMatriks) {
@@ -2041,6 +2281,12 @@ const optPlaceholder = document.createElement('option');
  }
  }
  kiraServisSeterusnya();
+ }
+
+ function semakPlatBaharuSaman(selectEl) {
+ if (selectEl.value === "DAFTAR_BARU") {
+ promptDaftarPlatBaharu('saman');
+ }
  }
 
  function semakPlatBaharuMinyak(selectEl) {
@@ -2317,7 +2563,7 @@ binaSenaraiChecklist(kat);
  
 const tarikhInput = document.getElementById('mTarikhServis');
  if (!tarikhInput.value) {
- tarikhInput.value = new Date().toISOString().split('T')[0];
+ tarikhInput.value = (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; })();
  }
 
  const semuaPlat = dapatkanSemuaPlat();
@@ -2547,7 +2793,7 @@ const tarikhInput = document.getElementById('mTarikhServis');
  populatePlatFilter();
  document.getElementById('modalMinyak').classList.remove('hidden');
  document.getElementById('modalMinyak').classList.add('flex');
- document.getElementById('mTarikhMinyak').value = new Date().toISOString().split('T')[0];
+ document.getElementById('mTarikhMinyak').value = (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; })();
  
 const semuaPlat = dapatkanSemuaPlat();
  const selectPlat = document.getElementById('mNoPlatMinyak');
@@ -2648,6 +2894,252 @@ if (semuaPlat.length === 0) {
   
  let idSedangDieditServis = null;
  let idSedangDieditMinyak = null;
+
+ // ================= SAMAN =================
+ let idSedangDieditSaman = null;
+
+ function escSaman(v) {
+   return String(v === undefined || v === null ? '' : v)
+     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+ }
+
+ function tarikhHariIni() {
+   const d = new Date();
+   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+ }
+
+ function tukarStatusSamanBorang() {
+   const status = document.getElementById('mStatusSaman').value;
+   const box = document.getElementById('boxTarikhBayarSaman');
+   const inp = document.getElementById('mTarikhBayarSaman');
+   if (status === 'Dibayar') {
+     box.classList.remove('hidden');
+     if (!inp.value) inp.value = tarikhHariIni();
+   } else {
+     box.classList.add('hidden');
+     inp.value = '';
+   }
+ }
+
+ function bukaModalSaman() {
+   populatePlatFilter();
+   document.getElementById('formSaman').reset();
+   idSedangDieditSaman = null;
+   document.getElementById('tajukModalSaman').innerText = "Rekod Saman";
+   document.getElementById('btnTeksSimpanSaman').innerText = "Simpan Saman";
+   document.getElementById('mTarikhSaman').value = tarikhHariIni();
+   tukarStatusSamanBorang();
+
+   const semuaPlat = dapatkanSemuaPlat();
+   const selectPlat = document.getElementById('mNoPlatSaman');
+   if (semuaPlat.length === 0) {
+     setTimeout(() => {
+       const platAwal = prompt("Pangkalan data kenderaan masih kosong.\nSila masukkan No. Plat Kenderaan anda untuk mula merekod saman:");
+       if (platAwal && platAwal.trim() !== '') {
+         const platDidaftar = daftarPlatBaharu(platAwal);
+         if (selectPlat) selectPlat.value = platDidaftar;
+       }
+     }, 120);
+   } else {
+     const currentPlat = document.getElementById('filterPlat').value;
+     if (currentPlat !== 'ALL' && selectPlat && semuaPlat.includes(currentPlat)) {
+       selectPlat.value = currentPlat;
+     }
+   }
+   document.getElementById('modalSaman').classList.remove('hidden');
+   document.getElementById('modalSaman').classList.add('flex');
+   tolakSejarahModal('modalSaman');
+ }
+
+ function tutupModalSaman() {
+   document.getElementById('modalSaman').classList.add('hidden');
+   document.getElementById('modalSaman').classList.remove('flex');
+   document.getElementById('formSaman').reset();
+   idSedangDieditSaman = null;
+   document.getElementById('tajukModalSaman').innerText = "Rekod Saman";
+   document.getElementById('btnTeksSimpanSaman').innerText = "Simpan Saman";
+   document.getElementById('boxTarikhBayarSaman').classList.add('hidden');
+   undurSejarahModal();
+ }
+
+ function simpanTransaksiSaman(e) {
+   e.preventDefault();
+   const plat = document.getElementById('mNoPlatSaman').value.trim().toUpperCase();
+   if (!plat || plat === "DAFTAR_BARU") {
+     alert("Sila pilih No. Plat Kenderaan yang sah.");
+     return;
+   }
+   const jumlah = parseFloat(document.getElementById('mJumlahSaman').value) || 0;
+   if (jumlah <= 0) {
+     alert("Sila masukkan amaun saman yang sah.");
+     return;
+   }
+   const status = document.getElementById('mStatusSaman').value === 'Dibayar' ? 'Dibayar' : 'Belum Dibayar';
+   let tarikhBayar = document.getElementById('mTarikhBayarSaman').value;
+   if (status === 'Dibayar' && !tarikhBayar) tarikhBayar = tarikhHariIni();
+   if (status !== 'Dibayar') tarikhBayar = '';
+
+   const rekod = {
+     id: idSedangDieditSaman ? idSedangDieditSaman : Date.now(),
+     tarikh: document.getElementById('mTarikhSaman').value,
+     plat: plat,
+     pihak: document.getElementById('mPihakSaman').value,
+     kesalahan: document.getElementById('mKesalahanSaman').value,
+     lokasi: document.getElementById('mLokasiSaman').value.trim(),
+     noSaman: document.getElementById('mNoSaman').value.trim(),
+     pemandu: document.getElementById('mPemanduSaman').value.trim(),
+     jumlah: jumlah,
+     status: status,
+     tarikhBayar: tarikhBayar,
+     catatan: document.getElementById('mCatatanSaman').value.trim()
+   };
+
+   if (idSedangDieditSaman) {
+     const index = datasetSaman.findIndex(d => String(d.id) === String(idSedangDieditSaman));
+     if (index !== -1) datasetSaman[index] = rekod; else datasetSaman.unshift(rekod);
+     hantarKeAwan({ action: 'KEMASKINI_SAMAN', data: rekod });
+     idSedangDieditSaman = null;
+   } else {
+     datasetSaman.unshift(rekod);
+     hantarKeAwan({ action: 'TAMBAH_SAMAN', data: rekod });
+   }
+   simpanKeStorageSaman();
+   ciptaAutoBackup();
+   tutupModalSaman();
+   populatePlatFilter();
+   tukarTab('saman');
+   renderAll();
+ }
+
+ function editRekodSaman(id) {
+   const item = datasetSaman.find(d => String(d.id) === String(id));
+   if (!item) return;
+   idSedangDieditSaman = item.id;
+   populatePlatFilter();
+   document.getElementById('tajukModalSaman').innerText = "Kemaskini Saman";
+   document.getElementById('btnTeksSimpanSaman').innerText = "Kemaskini Rekod";
+   document.getElementById('mTarikhSaman').value = item.tarikh || '';
+   document.getElementById('mNoPlatSaman').value = item.plat || '';
+   document.getElementById('mPihakSaman').value = item.pihak || 'JPJ';
+   // Jika kesalahan tiada dalam senarai pilihan, tambah supaya nilai asal tidak hilang
+   const selKes = document.getElementById('mKesalahanSaman');
+   if (item.kesalahan && ![...selKes.options].some(o => o.value === item.kesalahan)) {
+     const opt = document.createElement('option');
+     opt.value = item.kesalahan; opt.textContent = item.kesalahan;
+     selKes.appendChild(opt);
+   }
+   selKes.value = item.kesalahan || 'Lain-lain';
+   document.getElementById('mLokasiSaman').value = item.lokasi || '';
+   document.getElementById('mNoSaman').value = item.noSaman || '';
+   document.getElementById('mPemanduSaman').value = item.pemandu || '';
+   document.getElementById('mJumlahSaman').value = item.jumlah ? Number(item.jumlah).toFixed(2) : '';
+   document.getElementById('mStatusSaman').value = item.status === 'Dibayar' ? 'Dibayar' : 'Belum Dibayar';
+   document.getElementById('mTarikhBayarSaman').value = item.tarikhBayar || '';
+   tukarStatusSamanBorang();
+   document.getElementById('mCatatanSaman').value = item.catatan || '';
+   document.getElementById('modalSaman').classList.remove('hidden');
+   document.getElementById('modalSaman').classList.add('flex');
+   tolakSejarahModal('modalSaman');
+ }
+
+ // Tandakan saman sebagai telah dibayar (pintasan satu klik)
+ function tandaSamanDibayar(id) {
+   const index = datasetSaman.findIndex(d => String(d.id) === String(id));
+   if (index === -1) return;
+   const tarikhBayar = prompt(`Tarikh bayaran saman ${datasetSaman[index].plat} (RM ${Number(datasetSaman[index].jumlah).toFixed(2)}).\nFormat: YYYY-MM-DD`, tarikhHariIni());
+   if (tarikhBayar === null) return;
+   if (!/^\d{4}-\d{2}-\d{2}$/.test(tarikhBayar.trim())) { alert("Format tarikh tidak sah. Gunakan YYYY-MM-DD."); return; }
+   ciptaAutoBackup();
+   datasetSaman[index] = { ...datasetSaman[index], status: 'Dibayar', tarikhBayar: tarikhBayar.trim() };
+   simpanKeStorageSaman();
+   hantarKeAwan({ action: 'KEMASKINI_SAMAN', data: datasetSaman[index] });
+   renderAll();
+ }
+
+ function bukaModalPadamSaman(id) {
+   const item = datasetSaman.find(d => String(d.id) === String(id));
+   if (!item) return;
+   itemYangAkanDipadam = { jenis: 'saman', id: item.id };
+   const box = document.getElementById('maklumatPadamBox');
+   box.innerHTML = `
+ <div class="flex justify-between border-b border-slate-200 pb-1">
+ <span class="text-slate-500">Jenis:</span>
+ <strong class="text-rose-800">Saman (${escSaman(item.pihak)})</strong>
+ </div>
+ <div class="flex justify-between border-b border-slate-200 pb-1">
+ <span class="text-slate-500">Kenderaan:</span>
+ <strong class="bg-slate-800 text-white px-1.5 py-0.5 rounded text-[10px]">${escSaman(item.plat)}</strong>
+ </div>
+ <div class="flex justify-between border-b border-slate-200 pb-1">
+ <span class="text-slate-500">Tarikh:</span>
+ <strong>${formatTarikh(item.tarikh)}</strong>
+ </div>
+ <div class="flex justify-between border-b border-slate-200 pb-1">
+ <span class="text-slate-500">Kesalahan:</span>
+ <strong>${escSaman(item.kesalahan)}</strong>
+ </div>
+ <div class="flex justify-between pt-0.5">
+ <span class="text-slate-500">Amaun:</span>
+ <strong class="text-rose-600 text-sm">RM ${Number(item.jumlah).toFixed(2)}</strong>
+ </div>
+ `;
+   document.getElementById('btnSahkanPadam').onclick = function() { laksanaPadamRekod(); };
+   document.getElementById('modalPadam').classList.remove('hidden');
+   document.getElementById('modalPadam').classList.add('flex');
+   tolakSejarahModal('modalPadam');
+ }
+
+ function renderTableSaman(data) {
+   const tbody = document.getElementById('tableSamanBody');
+   if (!tbody) return;
+   tbody.innerHTML = '';
+   const jumlahSemua = data.reduce((a, c) => a + (c.jumlah || 0), 0);
+   const belum = data.filter(d => d.status !== 'Dibayar');
+   const bayar = data.filter(d => d.status === 'Dibayar');
+   const jumlahBelum = belum.reduce((a, c) => a + (c.jumlah || 0), 0);
+   const jumlahBayar = bayar.reduce((a, c) => a + (c.jumlah || 0), 0);
+   const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+   set('samanJumlahSemua', formatRM(jumlahSemua)); set('samanBilSemua', `${data.length} rekod`);
+   set('samanJumlahBelum', formatRM(jumlahBelum)); set('samanBilBelum', `${belum.length} rekod`);
+   set('samanJumlahBayar', formatRM(jumlahBayar)); set('samanBilBayar', `${bayar.length} rekod`);
+
+   const noData = document.getElementById('noDataSamanText');
+   if (data.length === 0) { if (noData) noData.classList.remove('hidden'); return; }
+   if (noData) noData.classList.add('hidden');
+
+   data.forEach(item => {
+     const tr = document.createElement('tr');
+     tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+     const dibayar = item.status === 'Dibayar';
+     const badgeStatus = dibayar
+       ? `<span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-bold px-2 py-0.5 rounded-full">Dibayar</span><div class="text-[10px] text-slate-500 mt-0.5">${item.tarikhBayar ? formatTarikh(item.tarikhBayar) : ''}</div>`
+       : `<span class="inline-block bg-rose-100 text-rose-800 border border-rose-300 text-[11px] font-bold px-2 py-0.5 rounded-full">Belum Dibayar</span>`;
+     tr.innerHTML = `
+ <td class="py-3 px-4 font-medium whitespace-nowrap text-slate-800">${formatTarikh(item.tarikh)}</td>
+ <td class="py-3 px-4 whitespace-nowrap"><span class="bg-slate-800 text-white font-bold text-xs px-2.5 py-1 rounded">${escSaman(item.plat)}</span></td>
+ <td class="py-3 px-4 text-xs"><span class="font-bold text-rose-800">${escSaman(item.pihak)}</span><div class="text-slate-700">${escSaman(item.kesalahan)}</div></td>
+ <td class="py-3 px-4 text-xs text-slate-600 max-w-[10rem] truncate" title="${escSaman(item.lokasi)}">${escSaman(item.lokasi) || '-'}</td>
+ <td class="py-3 px-4 text-xs font-mono text-slate-600 whitespace-nowrap">${escSaman(item.noSaman) || '-'}</td>
+ <td class="py-3 px-4 text-xs text-slate-600">${escSaman(item.pemandu) || '-'}</td>
+ <td class="py-3 px-4 text-right font-extrabold text-rose-700 font-mono whitespace-nowrap">${formatRM(item.jumlah)}</td>
+ <td class="py-3 px-4 whitespace-nowrap">${badgeStatus}</td>
+ <td class="py-3 px-4 text-xs text-slate-500 max-w-xs truncate" title="${escSaman(item.catatan)}">${escSaman(item.catatan) || '-'}</td>
+ <td class="py-3 px-4 text-center whitespace-nowrap no-print">
+ <div class="flex items-center justify-center gap-1.5">
+ ${dibayar ? '' : `<button onclick="tandaSamanDibayar(${item.id})" class="text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 p-1.5 rounded-lg border border-emerald-200 transition cursor-pointer" title="Tandakan telah dibayar"><i class="fa-solid fa-circle-check"></i></button>`}
+ <button onclick="editRekodSaman(${item.id})" class="text-blue-500 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 p-1.5 rounded-lg border border-blue-200 transition cursor-pointer" title="Edit / Kemaskini Saman">
+ <i class="fa-solid fa-pen-to-square"></i>
+ </button>
+ <button onclick="bukaModalPadamSaman(${item.id})" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 p-1.5 rounded-lg border border-rose-200 transition cursor-pointer" title="Padam Rekod">
+ <i class="fa-solid fa-trash-can"></i>
+ </button>
+ </div>
+ </td>
+ `;
+     tbody.appendChild(tr);
+   });
+ }
+ // ================= TAMAT SAMAN =================
 
  function editRekodMinyak(id) {
  const item = datasetMinyak.find(d => String(d.id) === String(id));
@@ -2847,6 +3339,14 @@ if (semuaPlat.length === 0) {
  populatePlatFilter();
 
  renderAll();
+ } else if (itemYangAkanDipadam.jenis === 'saman') {
+ const id = itemYangAkanDipadam.id;
+ ciptaAutoBackup();
+ datasetSaman = datasetSaman.filter(d => String(d.id) !== String(id));
+ simpanKeStorageSaman();
+ hantarKeAwan({ action: 'PADAM_SAMAN', id: id });
+ populatePlatFilter();
+ renderAll();
  } else if (itemYangAkanDipadam.jenis === 'servis') {
  const id = itemYangAkanDipadam.id;
  ciptaAutoBackup();
@@ -2909,7 +3409,8 @@ if (semuaPlat.length === 0) {
  const boxJulat = document.getElementById('boxJulatTarikh');
 
  const now = new Date();
- const todayStr = now.toISOString().split('T')[0];
+ const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+ const todayStr = ymd(now);
 
  if (mode === 'SEMUA') {
  dariEl.value = '';
@@ -2917,17 +3418,17 @@ if (semuaPlat.length === 0) {
  } else if (mode === 'BULAN_INI') {
  const awalBulan = new Date(now.getFullYear(), now.getMonth(), 1);
  const akhirBulan = new Date(now.getFullYear(), now.getMonth() + 1, 0);
- dariEl.value = awalBulan.toISOString().split('T')[0];
- hinggaEl.value = akhirBulan.toISOString().split('T')[0];
+ dariEl.value = ymd(awalBulan);
+ hinggaEl.value = ymd(akhirBulan);
  } else if (mode === 'BULAN_LEPAS') {
  const awalBulanLepas = new Date(now.getFullYear(), now.getMonth() - 1, 1);
  const akhirBulanLepas = new Date(now.getFullYear(), now.getMonth(), 0);
- dariEl.value = awalBulanLepas.toISOString().split('T')[0];
- hinggaEl.value = akhirBulanLepas.toISOString().split('T')[0];
+ dariEl.value = ymd(awalBulanLepas);
+ hinggaEl.value = ymd(akhirBulanLepas);
  } else if (mode === '30_HARI') {
  const d30 = new Date();
  d30.setDate(d30.getDate() - 30);
- dariEl.value = d30.toISOString().split('T')[0];
+ dariEl.value = ymd(d30);
  hinggaEl.value = todayStr;
  } else if (mode === 'TAHUN_INI') {
  dariEl.value = `${now.getFullYear()}-01-01`;
@@ -2936,6 +3437,36 @@ if (semuaPlat.length === 0) {
  // Biarkan pengguna pilih tarikh sendiri
  }
  renderAll();
+ }
+
+ // ===== KECEKAPAN BAHAN API: isian penuh ke penuh, dikira SETIAP kenderaan =====
+ function kiraKecekapanPlat(rekod) {
+   const susun = [...rekod].filter(d => d.odometer && d.odometer > 0)
+     .sort((a, b) => (a.odometer - b.odometer) || String(a.tarikh).localeCompare(String(b.tarikh)));
+   const segmen = {}; // id isian penuh -> {dKm, liter, kos}
+   let jarak = 0, liter = 0, kos = 0;
+   let sauh = null, lit = 0, kosSeg = 0;
+   susun.forEach(d => {
+     const penuh = d.statusIsian !== 'Separa';
+     if (sauh === null) { if (penuh) { sauh = d.odometer; lit = 0; kosSeg = 0; } return; }
+     lit += (d.liter || 0); kosSeg += (d.jumlah || 0);
+     if (penuh) {
+       const dKm = d.odometer - sauh;
+       if (dKm > 0 && lit > 0) { jarak += dKm; liter += lit; kos += kosSeg; segmen[d.id] = { dKm, liter: lit, kos: kosSeg }; }
+       sauh = d.odometer; lit = 0; kosSeg = 0;
+     }
+   });
+   return { jarak, liter, kos, segmen };
+ }
+ function kiraKecekapanSemua(rekod) {
+   const plats = [...new Set(rekod.map(d => d.plat))];
+   const hasil = { jarak: 0, liter: 0, kos: 0, segmen: {} };
+   plats.forEach(p => {
+     const r = kiraKecekapanPlat(rekod.filter(d => d.plat === p));
+     hasil.jarak += r.jarak; hasil.liter += r.liter; hasil.kos += r.kos;
+     Object.assign(hasil.segmen, r.segmen);
+   });
+   return hasil;
  }
 
  function renderAll() {
@@ -2998,6 +3529,13 @@ if (semuaPlat.length === 0) {
 
  filteredMinyak.sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
 
+ // Saman: tapis ikut plat dan julat tarikh yang sama
+ let filteredSaman = [...datasetSaman];
+ if (selectedPlat !== 'ALL') filteredSaman = filteredSaman.filter(d => d.plat === selectedPlat);
+ if (tarikhDari) filteredSaman = filteredSaman.filter(d => d.tarikh >= tarikhDari);
+ if (tarikhHingga) filteredSaman = filteredSaman.filter(d => d.tarikh <= tarikhHingga);
+ filteredSaman.sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
+
  // KPI Calculations
  const totalServis = filteredServis.reduce((acc, c) => acc + c.jumlah, 0);
  const totalAlat = filteredServis.reduce((acc, c) => acc + c.kosAlat, 0);
@@ -3025,19 +3563,14 @@ if (semuaPlat.length === 0) {
  document.getElementById('kpiLiterMinyak').innerText = `${totalLiter.toFixed(1)} Liter (${filteredMinyak.length} isian)`;
 
  // Pengiraan Kecekapan Petrol Purata & Kos Per Kilometer (CPK)
- const sortedOdo = [...filteredMinyak].filter(d => d.odometer && d.odometer > 0).sort((a,b) => a.odometer - b.odometer);
- let jarakDikesan = 0;
- let literDikesan = 0;
- for (let i = 1; i < sortedOdo.length; i++) {
- const delta = sortedOdo[i].odometer - sortedOdo[i-1].odometer;
- if (delta > 0 && sortedOdo[i].liter > 0) {
- jarakDikesan += delta;
- literDikesan += sortedOdo[i].liter;
- }
- }
+ const kecSemua = kiraKecekapanSemua(filteredMinyak);
+ const jarakDikesan = kecSemua.jarak;
+ const literDikesan = kecSemua.liter;
  const purataKmLiter = literDikesan > 0 ? (jarakDikesan / literDikesan).toFixed(2) : '-';
  const purataL100 = jarakDikesan > 0 ? ((literDikesan / jarakDikesan) * 100).toFixed(2) : '-';
- const cpk = jarakDikesan > 0 ? (totalOperasi / jarakDikesan).toFixed(2) : '0.00';
+ // Kos per km: kos servis dalam tempoh + kos minyak bagi segmen yang dikira, dibahagi jarak segmen
+ const kosCpk = totalServis + kecSemua.kos;
+ const cpk = jarakDikesan > 0 ? (kosCpk / jarakDikesan).toFixed(2) : '0.00';
 
  const elKmL = document.getElementById('kpiKecekapanMinyak');
  if (elKmL) {
@@ -3068,6 +3601,7 @@ if (semuaPlat.length === 0) {
 
  document.getElementById('badgeCountServis').innerText = filteredServis.length;
  document.getElementById('badgeCountMinyak').innerText = filteredMinyak.length;
+ document.getElementById('badgeCountSaman').innerText = filteredSaman.length;
 
  // Peringatan Servis Seterusnya (Tajuk Asal)
  updateReminder(filteredServis, selectedPlat);
@@ -3075,6 +3609,7 @@ if (semuaPlat.length === 0) {
  // Render Bahagian
  renderTableServis(filteredServis);
  renderTableMinyak(filteredMinyak);
+ renderTableSaman(filteredSaman);
  renderChartOperasi(filteredServis, filteredMinyak);
  renderChartSistem(filteredServis);
  renderChartTrend(filteredServis, filteredMinyak);
@@ -3170,21 +3705,14 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  document.getElementById('noDataMinyakText').classList.add('hidden');
  
  // Susun kronologi untuk perkiraan kecekapan petrol km/L
- const sortedChron = [...datasetMinyak].filter(d => d.odometer && d.odometer > 0).sort((a,b) => a.odometer - b.odometer);
+ const kecAll = kiraKecekapanSemua(datasetMinyak);
  const mapKecekapan = {};
- for (let i = 1; i < sortedChron.length; i++) {
- const cur = sortedChron[i];
- const prev = sortedChron[i-1];
- if (cur.plat === prev.plat && cur.odometer > prev.odometer && cur.liter > 0) {
- const dKm = cur.odometer - prev.odometer;
- const kmL = (dKm / cur.liter).toFixed(2);
- const l100 = ((cur.liter / dKm) * 100).toFixed(2);
- const kosKm = (cur.jumlah / dKm).toFixed(3);
- mapKecekapan[cur.id] = { dKm, kmL, l100, kosKm };
- }
- }
+ Object.keys(kecAll.segmen).forEach(id => {
+   const g = kecAll.segmen[id];
+   mapKecekapan[id] = { dKm: g.dKm, kmL: (g.dKm / g.liter).toFixed(2), l100: ((g.liter / g.dKm) * 100).toFixed(2), kosKm: (g.kos / g.dKm).toFixed(3) };
+ });
 
- data.forEach(item => {
+  data.forEach(item => {
  const tr = document.createElement('tr');
  tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
  
@@ -3440,24 +3968,22 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
      const recsServis = datasetServis.filter(d => d.plat === plat);
      const recsMinyak = datasetMinyak.filter(d => d.plat === plat);
 
-     const kosServis = recsServis.reduce((acc, c) => acc + (c.jumlah || 0), 0);
-     const kosMinyak = recsMinyak.reduce((acc, c) => acc + (c.jumlah || 0), 0);
+     const tDari = document.getElementById('filterTarikhDari')?.value || '';
+     const tHingga = document.getElementById('filterTarikhHingga')?.value || '';
+     const dalamTempoh = d => (!tDari || d.tarikh >= tDari) && (!tHingga || d.tarikh <= tHingga);
+     const sServis = recsServis.filter(dalamTempoh);
+     const sMinyak = recsMinyak.filter(dalamTempoh);
+
+     const kosServis = sServis.reduce((acc, c) => acc + (c.jumlah || 0), 0);
+     const kosMinyak = sMinyak.reduce((acc, c) => acc + (c.jumlah || 0), 0);
      const kosTotal = kosServis + kosMinyak;
 
-     // Kira jarak daripada rekod minyak
-     const sortedM = [...recsMinyak].filter(d => d.odometer && d.odometer > 0).sort((a,b) => a.odometer - b.odometer);
-     let jarakMinyak = 0;
-     let literMinyak = 0;
-     for (let i = 1; i < sortedM.length; i++) {
-       const delta = sortedM[i].odometer - sortedM[i-1].odometer;
-       if (delta > 0 && sortedM[i].liter > 0) {
-         jarakMinyak += delta;
-         literMinyak += sortedM[i].liter;
-       }
-     }
+     const kec = kiraKecekapanPlat(sMinyak);
+     const jarakMinyak = kec.jarak;
+     const literMinyak = kec.liter;
 
      const purataKmL = (literMinyak > 0 && jarakMinyak > 0) ? (jarakMinyak / literMinyak).toFixed(2) : '-';
-     const cpkVal = (jarakMinyak > 0) ? (kosTotal / jarakMinyak).toFixed(2) : '-';
+     const cpkVal = (jarakMinyak > 0) ? ((kosServis + kec.kos) / jarakMinyak).toFixed(2) : '-';
 
      let badgeKmL = `<span class="text-slate-400">-</span>`;
      if (purataKmL !== '-') {
@@ -3545,7 +4071,7 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  function eksportPDF() { window.print(); }
 
  function eksportBackupJSON() {
- const payload = { servis: datasetServis, minyak: datasetMinyak, kenderaan: datasetKenderaan };
+ const payload = { servis: datasetServis, minyak: datasetMinyak, saman: datasetSaman, kenderaan: datasetKenderaan };
  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
  const a = document.createElement('a');
  a.setAttribute("href", dataStr);
@@ -3567,6 +4093,8 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  ciptaAutoBackup();
  datasetServis = imported.servis || imported;
  datasetMinyak = imported.minyak || [];
+ datasetSaman = Array.isArray(imported.saman) ? imported.saman : [];
+ simpanKeStorageSaman();
  datasetKenderaan = imported.kenderaan || [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
  simpanKeStorageServis();
  simpanKeStorageMinyak();
@@ -3613,6 +4141,18 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
      renderAll();
      alert("✅ Semua rekod belanja minyak telah dipadam. Rekod penyelenggaraan anda kekal utuh!");
    }
+ } else if (tindakan === 'KOSONGKAN_SAMAN') {
+   const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD SAMAN?\n\n(Rekod servis dan minyak anda KEKAL SELAMAT).\n\nSila taipkan 'SAMAN' untuk mengesahkan:");
+   if (sah === 'SAMAN') {
+     ciptaAutoBackup();
+     datasetSaman = [];
+     simpanKeStorageSaman();
+     hantarKeAwan({ action: 'KOSONGKAN_SAMAN' });
+     tutupModalKeselamatan();
+     populatePlatFilter();
+     renderAll();
+     alert("✅ Semua rekod saman telah dipadam. Rekod servis dan minyak kekal utuh!");
+   }
  } else if (tindakan === 'KOSONGKAN_SERVIS') {
    const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD PENYELENGGARAAN?\n\n(Rekod belanja minyak anda KEKAL SELAMAT).\n\nSila taipkan 'SERVIS' untuk mengesahkan:");
    if (sah === 'SERVIS') {
@@ -3628,17 +4168,20 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
      alert("✅ Semua rekod penyelenggaraan telah dipadam. Rekod belanja minyak kekal utuh!");
    }
  } else if (tindakan === 'KOSONGKAN') {
- const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD TRANSAKSI (Servis & Minyak)?\n\nSila taipkan 'PADAM' untuk mengesahkan:");
+ const sah = prompt("⚠️ PERINGATAN KESELAMATAN:\n\nAdakah anda mahu memadam SEMUA REKOD TRANSAKSI (Servis, Minyak & Saman)?\n\nSila taipkan 'PADAM' untuk mengesahkan:");
  if (sah === 'PADAM') {
  ciptaAutoBackup();
  datasetServis = [];
  datasetMinyak = [];
  datasetKenderaan = [];
+ datasetSaman = [];
  simpanKeStorageServis();
  simpanKeStorageMinyak();
+ simpanKeStorageSaman();
  simpanKeStorageKenderaan();
  hantarKeAwan({ action: 'KOSONGKAN_SERVIS' });
  hantarKeAwan({ action: 'KOSONGKAN_MINYAK' });
+ hantarKeAwan({ action: 'KOSONGKAN_SAMAN' });
  tutupModalKeselamatan();
  populatePlatFilter();
 
@@ -3675,6 +4218,8 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  if (confirm(`Pulihkan data daripada salinan ${parsed.tarikhSimpan}?`)) {
  datasetServis = parsed.servis || [];
  datasetMinyak = parsed.minyak || [];
+ datasetSaman = Array.isArray(parsed.saman) ? parsed.saman : [];
+ simpanKeStorageSaman();
  datasetKenderaan = parsed.kenderaan || [...new Set([...datasetServis.map(d=>d.plat), ...datasetMinyak.map(d=>d.plat)])].filter(Boolean);
  simpanKeStorageServis();
  simpanKeStorageMinyak();
