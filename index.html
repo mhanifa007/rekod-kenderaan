@@ -31,6 +31,25 @@
  .shadow-sm, .shadow-md, .shadow-2xl { box-shadow: none !important; }
  .border { border-color: #e2e8f0 !important; }
  }
+ #laporanCetak { display: none; }
+ @page { size: A4 landscape; margin: 10mm; }
+ @media print {
+ body.mod-laporan > *:not(#laporanCetak) { display: none !important; }
+ body.mod-laporan #laporanCetak { display: block !important; }
+ #laporanCetak { font-family: 'Inter', sans-serif; color: #0f172a; font-size: 10.5px; }
+ #laporanCetak h1 { font-size: 17px; font-weight: 800; margin: 0 0 2px; }
+ #laporanCetak h2 { font-size: 12.5px; font-weight: 800; margin: 14px 0 5px; padding-bottom: 2px; border-bottom: 2px solid #334155; }
+ #laporanCetak h3 { font-size: 11px; font-weight: 700; margin: 10px 0 3px; }
+ #laporanCetak .meta { color: #475569; font-size: 10px; margin-bottom: 6px; }
+ #laporanCetak table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+ #laporanCetak th { background: #e2e8f0; text-align: left; padding: 3px 5px; border: 1px solid #94a3b8; font-size: 9.5px; }
+ #laporanCetak td { padding: 3px 5px; border: 1px solid #cbd5e1; vertical-align: top; }
+ #laporanCetak .r { text-align: right; white-space: nowrap; }
+ #laporanCetak tr.jum td { font-weight: 800; background: #f1f5f9; }
+ #laporanCetak tr { page-break-inside: avoid; }
+ #laporanCetak .pecah { page-break-before: always; }
+ #laporanCetak .nota { font-size: 9px; color: #64748b; margin-top: 4px; }
+ }
  th.sortable:hover { background-color: #1e293b; cursor: pointer; }
  .tab-active { border-bottom: 2px solid #2563eb; color: #1e40af; font-weight: 700; }
  </style>
@@ -107,8 +126,8 @@
  <button onclick="eksportExcel()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition flex items-center gap-1 mr-1 cursor-pointer" title="Muat Turun Excel (.csv)">
  <i class="fa-solid fa-file-excel text-emerald-400"></i> Excel
  </button>
- <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition flex items-center gap-1 mr-1 cursor-pointer" title="Cetak Ringkasan Eksekutif A4">
- <i class="fa-solid fa-print text-indigo-200"></i> A4 Eksekutif
+ <button onclick="eksportLaporanEksekutif()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-2 py-1 rounded font-semibold transition flex items-center gap-1 mr-1 cursor-pointer" title="Cetak Laporan Belanja Kenderaan (A4 melintang)">
+ <i class="fa-solid fa-print text-indigo-200"></i> Laporan Belanja
  </button>
  <button onclick="bukaModalTetapan()" class="bg-slate-700/80 hover:bg-slate-600 text-white px-2 py-1 rounded font-semibold transition flex items-center gap-1 cursor-pointer" title="Tetapan Polisi SST & Subsidi">
  <i class="fa-solid fa-sliders text-amber-400"></i> Tetapan
@@ -4078,10 +4097,79 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
 
  
  function eksportLaporanEksekutif() {
+ const E = escSaman;
  const selectedPlat = document.getElementById('filterPlat')?.value || 'ALL';
- const platNama = selectedPlat === 'ALL' ? 'Semua Kenderaan' : selectedPlat;
+ const tDari = document.getElementById('filterTarikhDari')?.value || '';
+ const tHingga = document.getElementById('filterTarikhHingga')?.value || '';
+ const dalam = d => (selectedPlat === 'ALL' || d.plat === selectedPlat) && (!tDari || d.tarikh >= tDari) && (!tHingga || d.tarikh <= tHingga);
+ const servis = datasetServis.filter(dalam).sort((a, b) => String(a.tarikh).localeCompare(String(b.tarikh)));
+ const minyak = datasetMinyak.filter(dalam).sort((a, b) => (a.odometer - b.odometer) || String(a.tarikh).localeCompare(String(b.tarikh)));
+ const saman = datasetSaman.filter(dalam).sort((a, b) => String(a.tarikh).localeCompare(String(b.tarikh)));
+ const tempoh = (tDari || tHingga) ? `${tDari ? formatTarikh(tDari) : 'Awal'} hingga ${tHingga ? formatTarikh(tHingga) : 'Terkini'}` : 'Keseluruhan masa';
  const tarikhCetak = new Date().toLocaleDateString('ms-MY', { year: 'numeric', month: 'long', day: 'numeric' });
- 
+ const plats = [...new Set([...servis, ...minyak].map(d => d.plat))].sort();
+ const n2 = v => (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+ // Ringkasan setiap kenderaan
+ let jS = 0, jM = 0, jL = 0, jJarak = 0, jLiterKec = 0, jKosKec = 0, jAlat = 0, jUpah = 0;
+ let ringkasan = '';
+ plats.forEach(pl => {
+   const sv = servis.filter(d => d.plat === pl), mn = minyak.filter(d => d.plat === pl);
+   const kS = sv.reduce((a, c) => a + (c.jumlah || 0), 0), kA = sv.reduce((a, c) => a + (c.kosAlat || 0), 0), kU = sv.reduce((a, c) => a + (c.kosUpah || 0), 0);
+   const kM = mn.reduce((a, c) => a + (c.jumlah || 0), 0), lit = mn.reduce((a, c) => a + (c.liter || 0), 0);
+   const kec = kiraKecekapanPlat(mn);
+   jS += kS; jM += kM; jL += lit; jAlat += kA; jUpah += kU; jJarak += kec.jarak; jLiterKec += kec.liter; jKosKec += kec.kos;
+   ringkasan += `<tr><td><b>${E(pl)}</b></td><td class="r">${sv.length}</td><td class="r">${n2(kA)}</td><td class="r">${n2(kU)}</td><td class="r"><b>${n2(kS)}</b></td>
+     <td class="r">${mn.length}</td><td class="r">${n2(lit)}</td><td class="r"><b>${n2(kM)}</b></td><td class="r"><b>${n2(kS + kM)}</b></td>
+     <td class="r">${kec.jarak > 0 ? kec.jarak.toLocaleString() : '-'}</td><td class="r">${kec.liter > 0 ? n2(kec.jarak / kec.liter) : '-'}</td><td class="r">${kec.jarak > 0 ? n2((kS + kec.kos) / kec.jarak) : '-'}</td></tr>`;
+ });
+ ringkasan += `<tr class="jum"><td>JUMLAH</td><td class="r">${servis.length}</td><td class="r">${n2(jAlat)}</td><td class="r">${n2(jUpah)}</td><td class="r">${n2(jS)}</td>
+   <td class="r">${minyak.length}</td><td class="r">${n2(jL)}</td><td class="r">${n2(jM)}</td><td class="r">${n2(jS + jM)}</td>
+   <td class="r">${jJarak > 0 ? jJarak.toLocaleString() : '-'}</td><td class="r">${jLiterKec > 0 ? n2(jJarak / jLiterKec) : '-'}</td><td class="r">${jJarak > 0 ? n2((jS + jKosKec) / jJarak) : '-'}</td></tr>`;
+
+ // Butiran penyelenggaraan setiap kenderaan
+ let butiranServis = '';
+ plats.forEach(pl => {
+   const sv = servis.filter(d => d.plat === pl);
+   if (!sv.length) return;
+   let sub = 0;
+   const baris = sv.map(d => { sub += d.jumlah || 0; return `<tr><td>${E(formatTarikh(d.tarikh))}</td><td class="r">${(d.odometer || 0).toLocaleString()}</td><td>${E(d.kategori || '')}</td><td>${E(d.simptom || '')}</td><td>${E(d.alat || '')}</td><td>${E(d.bengkel || '')}</td><td class="r">${n2(d.kosAlat)}</td><td class="r">${n2(d.kosUpah)}</td><td class="r">${n2(d.sst)}</td><td class="r"><b>${n2(d.jumlah)}</b></td></tr>`; }).join('');
+   butiranServis += `<h3>${E(pl)}</h3><table><tr><th>Tarikh</th><th>Odometer</th><th>Kategori</th><th>Simptom</th><th>Pembaikan / Penyelenggaraan</th><th>Bengkel</th><th class="r">Alat (RM)</th><th class="r">Upah (RM)</th><th class="r">SST (RM)</th><th class="r">Jumlah (RM)</th></tr>${baris}<tr class="jum"><td colspan="9" class="r">Jumlah ${E(pl)}</td><td class="r">${n2(sub)}</td></tr></table>`;
+ });
+
+ // Butiran minyak setiap kenderaan
+ let butiranMinyak = '';
+ plats.forEach(pl => {
+   const mn = minyak.filter(d => d.plat === pl);
+   if (!mn.length) return;
+   const kec = kiraKecekapanPlat(mn);
+   let sub = 0, subL = 0;
+   const baris = mn.map(d => { sub += d.jumlah || 0; subL += d.liter || 0; const g = kec.segmen[d.id];
+     return `<tr><td>${E(formatTarikh(d.tarikh))}</td><td>${E(d.stesen || '')}</td><td>${E(d.jenis || '')}</td><td>${E(d.statusIsian || 'Penuh')}</td><td class="r">${(d.odometer || 0).toLocaleString()}</td><td class="r">${n2(d.liter)}</td><td class="r"><b>${n2(d.jumlah)}</b></td><td class="r">${g ? n2(g.dKm / g.liter) : '-'}</td></tr>`; }).join('');
+   butiranMinyak += `<h3>${E(pl)}</h3><table><tr><th>Tarikh</th><th>Stesen</th><th>Jenis</th><th>Isian</th><th class="r">Odometer</th><th class="r">Liter</th><th class="r">Jumlah (RM)</th><th class="r">km/L</th></tr>${baris}<tr class="jum"><td colspan="5" class="r">Jumlah ${E(pl)}${kec.jarak > 0 ? ` &nbsp; (purata ${n2(kec.jarak / kec.liter)} km/L)` : ''}</td><td class="r">${n2(subL)}</td><td class="r">${n2(sub)}</td><td></td></tr></table>`;
+ });
+
+ // Saman (asing, tidak dicampur dalam jumlah kos)
+ let sBelum = 0, sBayar = 0;
+ const barisSaman = saman.map(d => { const j = Number(d.jumlah) || 0; if (d.status === 'Dibayar') sBayar += j; else sBelum += j;
+   return `<tr><td>${E(formatTarikh(d.tarikh))}</td><td>${E(d.plat)}</td><td>${E(d.pihak)}</td><td>${E(d.kesalahan)}</td><td>${E(d.lokasi)}</td><td>${E(d.noSaman)}</td><td class="r">${n2(j)}</td><td>${E(d.status)}</td><td>${d.tarikhBayar ? E(formatTarikh(d.tarikhBayar)) : ''}</td></tr>`; }).join('');
+
+ document.getElementById('laporanCetak').innerHTML = `
+   <h1>LAPORAN BELANJA KENDERAAN</h1>
+   <div class="meta">Kenderaan: <b>${selectedPlat === 'ALL' ? 'Semua Kenderaan' : E(selectedPlat)}</b> &nbsp;|&nbsp; Tempoh: <b>${E(tempoh)}</b> &nbsp;|&nbsp; Tarikh cetak: ${E(tarikhCetak)}</div>
+   <h2>A. Ringkasan Belanja Mengikut Kenderaan (RM)</h2>
+   ${plats.length ? `<table><tr><th rowspan="2">No Plat</th><th colspan="4">Penyelenggaraan</th><th colspan="3">Minyak</th><th rowspan="2" class="r">Jumlah Belanja</th><th colspan="3">Kecekapan</th></tr>
+   <tr><th class="r">Bil</th><th class="r">Alat</th><th class="r">Upah</th><th class="r">Jumlah</th><th class="r">Bil isian</th><th class="r">Liter</th><th class="r">Jumlah</th><th class="r">Jarak (km)</th><th class="r">km/L</th><th class="r">RM/km</th></tr>${ringkasan}</table>` : '<p>Tiada rekod dalam tempoh ini.</p>'}
+   <div class="nota">km/L dikira isian penuh ke penuh bagi setiap kenderaan. RM/km = kos servis dalam tempoh + kos minyak bagi jarak yang dikira, dibahagi jarak itu. Saman tidak dimasukkan dalam jumlah belanja.</div>
+   <h2 class="pecah">B. Butiran Penyelenggaraan Mengikut Kenderaan</h2>${butiranServis || '<p>Tiada rekod.</p>'}
+   <h2 class="pecah">C. Butiran Belanja Minyak Mengikut Kenderaan</h2>${butiranMinyak || '<p>Tiada rekod.</p>'}
+   <h2 class="pecah">D. Saman (dilaporkan berasingan)</h2>
+   ${saman.length ? `<table><tr><th>Tarikh</th><th>No Plat</th><th>Pihak</th><th>Kesalahan</th><th>Lokasi</th><th>No Saman</th><th class="r">Jumlah (RM)</th><th>Status</th><th>Tarikh Bayar</th></tr>${barisSaman}
+   <tr class="jum"><td colspan="6" class="r">Belum dibayar</td><td class="r">${n2(sBelum)}</td><td colspan="2"></td></tr><tr class="jum"><td colspan="6" class="r">Sudah dibayar</td><td class="r">${n2(sBayar)}</td><td colspan="2"></td></tr></table>` : '<p>Tiada rekod saman.</p>'}`;
+
+ const bersih = () => { document.body.classList.remove('mod-laporan'); window.removeEventListener('afterprint', bersih); };
+ window.addEventListener('afterprint', bersih);
+ document.body.classList.add('mod-laporan');
  window.print();
  }
 
@@ -4685,5 +4773,6 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
    </div>
  </div>
 
+<div id="laporanCetak"></div>
 </body>
 </html>
