@@ -4050,13 +4050,30 @@ const sasaranHtml = (item.odoSeterusnya && item.tarikhSeterusnya)
  csv += `"${formatTarikh(r.tarikh)}","${r.plat}","${r.stesen}","${r.jenis}",${(r.liter || 0).toFixed(2)},${r.odometer || 0},${r.jumlah.toFixed(2)},"${r.catatan}"\n`;
  });
 
- const encodedUri = encodeURI(csv);
+ // --- SAMAN ---
+ const q = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+ const saman = datasetSaman.filter(d => (selectedPlat === 'ALL' || d.plat === selectedPlat) && (!tarikhDari || d.tarikh >= tarikhDari) && (!tarikhHingga || d.tarikh <= tarikhHingga))
+   .sort((a, b) => String(a.tarikh).localeCompare(String(b.tarikh)));
+ csv += "\n--- REKOD SAMAN ---\n";
+ csv += "Tarikh,No Plat,Pihak Berkuasa,Kesalahan,Lokasi,No Saman,Pemandu,Jumlah (RM),Status,Tarikh Bayar,Catatan\n";
+ let sBelum = 0, sBayar = 0;
+ saman.forEach(r => {
+   const jum = Number(r.jumlah) || 0;
+   if (r.status === 'Dibayar') sBayar += jum; else sBelum += jum;
+   csv += [q(formatTarikh(r.tarikh)), q(r.plat), q(r.pihak), q(r.kesalahan), q(r.lokasi), q(r.noSaman), q(r.pemandu), jum.toFixed(2), q(r.status), q(r.tarikhBayar ? formatTarikh(r.tarikhBayar) : ''), q(r.catatan)].join(',') + "\n";
+ });
+ csv += `"JUMLAH BELUM DIBAYAR (RM)",${sBelum.toFixed(2)}\n"JUMLAH SUDAH DIBAYAR (RM)",${sBayar.toFixed(2)}\n"JUMLAH SEMUA SAMAN (RM)",${(sBelum + sBayar).toFixed(2)}\n`;
+
+ // Blob + BOM: '#' atau '&' dalam data tidak memotong fail, dan huruf Melayu dipaparkan betul dalam Excel
+ const blob = new Blob(["\ufeff" + csv.replace("data:text/csv;charset=utf-8,", "")], { type: "text/csv;charset=utf-8;" });
+ const url = URL.createObjectURL(blob);
  const link = document.createElement("a");
- link.setAttribute("href", encodedUri);
+ link.setAttribute("href", url);
  link.setAttribute("download", `Laporan_Penyelenggaraan_${selectedPlat}_${tarikhHingga || 'Terkini'}.csv`);
  document.body.appendChild(link);
  link.click();
  document.body.removeChild(link);
+ setTimeout(() => URL.revokeObjectURL(url), 2000);
  }
 
  
